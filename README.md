@@ -98,19 +98,73 @@ function MyComponent() {
 | `@voicefield/react` | React hook + QR popup component |
 | `@voicefield/server` | Next.js API route handler (relay) |
 
-## Self-hosting the phone page
+## Deployment modes
 
-By default, the QR code points to `voicefield.dev/mic`. To self-host:
+### Local development (no ngrok needed)
+
+For local dev, mount the phone page in your own app and let Voicefield auto-detect your LAN IP:
+
+```tsx
+// app/mic/page.tsx — one line
+"use client"
+export { Mic as default } from "@voicefield/react/phone"
+```
+
+```tsx
+// In your component
+const vf = useVoicefield({
+  serverUrl: '/api/voice',
+  phoneUrl: '',        // local mode — uses your server's /mic page
+  language: 'en',
+})
+```
+
+The QR code will point to `http://192.168.x.x:PORT/mic` — your phone connects directly over WiFi. No tunnel, no HTTPS needed (localhost gets `getUserMedia` without HTTPS).
+
+The LAN IP is auto-detected via the `/api/voice/network-info` endpoint. To override (e.g., multiple network adapters):
+
+```env
+NEXT_PUBLIC_VOICEFIELD_EXTERNAL_URL=http://192.168.1.50:3000/api/voice
+```
+
+### Hosted mode (zero setup for phone page)
+
+Use `voicefield.dev` to serve the phone page — your server is still the relay:
 
 ```tsx
 const vf = useVoicefield({
   serverUrl: '/api/voice',
-  phoneUrl: 'https://my-voicefield.example.com',
+  // phoneUrl defaults to https://voicefield.dev
+  externalServerUrl: 'https://myapp.com/api/voice',  // phone must reach this
+  language: 'en',
+})
+```
+
+The phone loads `voicefield.dev/mic` (static, open source, no data stored), but all API calls go to **your** server.
+
+### Self-hosted phone page
+
+Deploy the phone page yourself for full control:
+
+```tsx
+const vf = useVoicefield({
+  serverUrl: '/api/voice',
+  phoneUrl: 'https://voice.mycompany.com',
   language: 'en',
 })
 ```
 
 The phone page source is in `apps/web/` — deploy it anywhere static (Cloudflare Pages, Vercel, GitHub Pages).
+
+## Why this architecture?
+
+**No audio leaves the phone.** Speech-to-text runs entirely in the phone browser (via Soniox SDK). The server only relays recognized text — never audio.
+
+**Your server, your data.** The relay runs on your infrastructure. Sessions are in-memory with short TTLs (30 min sliding, 24h hard max). No database, no persistence.
+
+**voicefield.dev stores nothing.** It serves a static SPA (the phone page). When a phone loads `voicefield.dev/mic?server=yourapp.com&code=123456`, all API calls go to `yourapp.com` — voicefield.dev never sees the transcript.
+
+**Why not just use the browser's SpeechRecognition API?** Browser support is inconsistent, accuracy varies wildly, and it doesn't work cross-origin. Voicefield uses the phone's microphone (better hardware) with a professional STT engine (Soniox), giving consistent, high-quality results across all devices.
 
 ## License
 
