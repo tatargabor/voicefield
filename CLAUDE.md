@@ -40,12 +40,13 @@ cd apps/example && npx playwright test
 ## Publishing
 
 ```bash
-cd packages/core && pnpm publish --access public
-cd packages/react && pnpm publish --access public
-cd packages/server && pnpm publish --access public
+./scripts/publish.sh patch   # bump + build + publish + tag + GitHub release
+./scripts/publish.sh minor
+./scripts/publish.sh major
+./scripts/publish.sh --dry-run patch  # preview only
 ```
 
-Order matters: core → react/server (react and server depend on core).
+Lockstep versioning — all packages share the same version. Script handles order (core → react → server).
 Packages publish to npm under `@voicefield` org.
 
 ## Coding Conventions

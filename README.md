@@ -257,11 +257,13 @@ cd apps/example && npx playwright test
 ### Publishing
 
 ```bash
-# Always use pnpm (resolves workspace: protocol)
-cd packages/core && pnpm publish --access public
-cd packages/react && pnpm publish --access public
-cd packages/server && pnpm publish --access public
+./scripts/publish.sh patch   # bump all → build → npm publish → git tag → GitHub release
+./scripts/publish.sh minor
+./scripts/publish.sh major
+./scripts/publish.sh --dry-run patch  # preview without changes
 ```
+
+All packages use lockstep versioning. Requires clean working tree, `gh` CLI, and npm auth.
 
 ## License
 

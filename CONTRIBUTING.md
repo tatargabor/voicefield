@@ -105,15 +105,18 @@ Build order matters: **core** must build before react/server. `pnpm build` handl
 
 ## Publishing
 
-Packages publish to npm under `@voicefield` org. Order: core → react → server.
+Packages publish to npm under `@voicefield` org with lockstep versioning (all packages share the same version number).
 
 ```bash
-cd packages/core && pnpm publish --access public
-cd packages/react && pnpm publish --access public
-cd packages/server && pnpm publish --access public
+./scripts/publish.sh patch   # 0.2.0 → 0.2.1
+./scripts/publish.sh minor   # 0.2.1 → 0.3.0
+./scripts/publish.sh major   # 0.3.0 → 1.0.0
+./scripts/publish.sh --dry-run patch  # preview without changes
 ```
 
-Always use `pnpm publish` (not `npm`) — it resolves `workspace:^` dependencies.
+The script handles: version bump → build → npm publish (core → react → server) → git tag → GitHub release with changelog.
+
+Requires a clean working tree, `gh` CLI authenticated, and npm auth (`pnpm login`).
 
 ## Architecture
 
