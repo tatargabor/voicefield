@@ -30,7 +30,8 @@ export function QRPopup({
       return
     }
 
-    const url = buildQRUrl(phoneUrl, serverUrl, pairingCode, secret)
+    const currentOrigin = typeof window !== "undefined" ? window.location.origin : ""
+    const url = buildQRUrl(phoneUrl, serverUrl, pairingCode, secret, currentOrigin)
 
     import("qrcode").then((QRCode) => {
       QRCode.toDataURL(url, {
@@ -43,7 +44,9 @@ export function QRPopup({
 
   if (!isVisible || !pairingCode) return null
 
-  const micHost = new URL("/mic", phoneUrl).host
+  const origin = typeof window !== "undefined" ? window.location.origin : ""
+  const base = phoneUrl || origin
+  const micHost = base ? new URL("/mic", base).host : "voicefield.dev"
 
   return (
     <div
@@ -92,8 +95,11 @@ export function QRPopup({
         <p style={{ fontSize: "13px", color: "#888", marginBottom: "4px" }}>
           Or go to <span style={{ fontFamily: "monospace", fontWeight: 500 }}>{micHost}/mic</span>
         </p>
-        <p style={{ fontSize: "28px", fontFamily: "monospace", fontWeight: 700, letterSpacing: "0.1em" }}>
+        <p style={{ fontSize: "28px", fontFamily: "monospace", fontWeight: 700, letterSpacing: "0.1em", marginBottom: "8px" }}>
           {formatPairingCode(pairingCode)}
+        </p>
+        <p style={{ fontSize: "11px", color: "#aaa", wordBreak: "break-all", fontFamily: "monospace", lineHeight: 1.4 }}>
+          Server: {serverUrl}
         </p>
 
         <button

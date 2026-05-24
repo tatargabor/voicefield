@@ -1,6 +1,6 @@
 {
   "name": "@voicefield/react",
-  "version": "0.1.0",
+  "version": "0.1.6",
   "description": "React hook and components for Voicefield voice input",
   "type": "module",
   "main": "./dist/index.js",
@@ -9,23 +9,36 @@
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
+    },
+    "./phone": {
+      "types": "./dist/phone-page.d.ts",
+      "import": "./dist/phone-page.js"
     }
   },
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "build": "tsc",
     "dev": "tsc --watch",
     "clean": "rm -rf dist"
   },
   "dependencies": {
-    "@voicefield/core": "workspace:*",
+    "@voicefield/core": "workspace:^",
     "qrcode": "^1.5.0"
   },
   "peerDependencies": {
     "react": ">=18.0.0",
-    "react-dom": ">=18.0.0"
+    "react-dom": ">=18.0.0",
+    "@soniox/client": ">=2.0.0"
+  },
+  "peerDependenciesMeta": {
+    "@soniox/client": {
+      "optional": true
+    }
   },
   "devDependencies": {
+    "@soniox/client": "^2.1.0",
     "@types/qrcode": "^1.5.0",
     "@types/react": "^19.0.0",
     "react": "^19.0.0",

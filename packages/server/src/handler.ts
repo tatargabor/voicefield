@@ -1,3 +1,4 @@
+import { networkInterfaces } from "os"
 import { NextRequest, NextResponse } from "next/server"
 import { isValidPairingCode } from "@voicefield/core"
 import {
@@ -90,6 +91,8 @@ export function createVoicefieldHandler(config: VoicefieldServerConfig = {}) {
           return handleSSE(request, cors)
         case "status":
           return handleStatus(request, cors)
+        case "network-info":
+          return handleNetworkInfo(request, cors)
         default:
           return json({ error: "Not found" }, 404, cors)
       }
@@ -352,4 +355,28 @@ async function handleStatus(request: NextRequest, cors: Record<string, string>) 
 
   const commands = drainCommands(session)
   return json({ state: session.state, fields: session.fields, commands }, 200, cors)
+}
+
+function getLanAddresses(): string[] {
+  const nets = networkInterfaces()
+  const results: string[] = []
+  for (const ifaces of Object.values(nets)) {
+    if (!ifaces) continue
+    for (const iface of ifaces) {
+      if (iface.family === "IPv4" && !iface.internal) {
+        results.push(iface.address)
+      }
+    }
+  }
+  return results
+}
+
+async function handleNetworkInfo(request: NextRequest, cors: Record<string, string>) {
+  const port = request.nextUrl.port || "3000"
+  const lanIps = getLanAddresses()
+  const basePath = request.nextUrl.pathname.replace(/\/network-info$/, "")
+  return json({
+    lan: lanIps.map((ip) => `http://${ip}:${port}${basePath}`),
+    localhost: `http://localhost:${port}${basePath}`,
+  }, 200, cors)
 }

@@ -37,6 +37,7 @@ export interface SessionCreateResponse {
 
 export interface VoicefieldConfig {
   serverUrl: string
+  externalServerUrl?: string
   phoneUrl?: string
   language: string | string[]
   maxRecordingDuration?: number

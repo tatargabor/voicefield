@@ -14,10 +14,13 @@ export function buildQRUrl(
   phoneUrl: string,
   serverUrl: string,
   code: string,
-  secret: string
+  secret: string,
+  origin?: string
 ): string {
-  const url = new URL("/mic", phoneUrl)
-  url.searchParams.set("server", serverUrl)
+  const base = phoneUrl || origin || (typeof window !== "undefined" ? window.location.origin : "http://localhost")
+  const url = new URL("/mic", base)
+  const serverBase = serverUrl.startsWith("/") && origin ? origin + serverUrl : serverUrl
+  url.searchParams.set("server", serverBase)
   url.searchParams.set("code", code)
   url.searchParams.set("secret", secret)
   return url.toString()

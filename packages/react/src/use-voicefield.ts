@@ -4,7 +4,7 @@ import { useState, useCallback, useRef, useEffect } from "react"
 import type { VoicefieldConfig, SessionState, VoiceField } from "@voicefield/core"
 import { FieldRegistry } from "./field-registry"
 
-const PHONE_URL_DEFAULT = "https://voicefield.dev"
+const PHONE_URL_HOSTED = "https://voicefield.dev"
 
 export interface UseVoicefieldReturn {
   sessionId: string | null
@@ -33,7 +33,7 @@ export interface UseVoicefieldReturn {
 
 export function useVoicefield(config: VoicefieldConfig): UseVoicefieldReturn {
   const serverUrl = config.serverUrl.replace(/\/$/, "")
-  const phoneUrl = (config.phoneUrl || PHONE_URL_DEFAULT).replace(/\/$/, "")
+  const phoneUrl = (config.phoneUrl === undefined ? PHONE_URL_HOSTED : config.phoneUrl).replace(/\/$/, "")
 
   const [sessionId, setSessionId] = useState<string | null>(null)
   const [pairingCode, setPairingCode] = useState<string | null>(null)
@@ -41,10 +41,27 @@ export function useVoicefield(config: VoicefieldConfig): UseVoicefieldReturn {
   const [sessionState, setSessionState] = useState<SessionState | "disconnected" | null>(null)
   const [isQRVisible, setIsQRVisible] = useState(false)
   const [isRecording, setIsRecording] = useState(false)
+  const [detectedExternalUrl, setDetectedExternalUrl] = useState<string | null>(null)
 
   const registryRef = useRef(new FieldRegistry())
   const eventSourceRef = useRef<EventSource | null>(null)
   const rotationTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  const externalServerUrl = config.externalServerUrl
+    || detectedExternalUrl
+    || (typeof window !== "undefined" ? window.location.origin + serverUrl : serverUrl)
+
+  useEffect(() => {
+    if (config.externalServerUrl) return
+    fetch(`${serverUrl}/network-info`)
+      .then((r) => r.json())
+      .then((data: { lan?: string[] }) => {
+        if (data.lan && data.lan.length > 0) {
+          setDetectedExternalUrl(data.lan[0])
+        }
+      })
+      .catch(() => {})
+  }, [serverUrl, config.externalServerUrl])
 
   const createNewSession = useCallback(async () => {
     const fields = registryRef.current.getFields()
@@ -220,7 +237,7 @@ export function useVoicefield(config: VoicefieldConfig): UseVoicefieldReturn {
     switchField,
     register,
     unregister,
-    serverUrl,
+    serverUrl: externalServerUrl,
     phoneUrl,
   }
 }
