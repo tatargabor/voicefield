@@ -8,11 +8,13 @@
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "import": "./dist/index.js"
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
     },
     "./phone": {
       "types": "./dist/phone-page.d.ts",
-      "import": "./dist/phone-page.js"
+      "import": "./dist/phone-page.js",
+      "default": "./dist/phone-page.js"
     }
   },
   "files": [

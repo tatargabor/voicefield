@@ -6,6 +6,13 @@ import { FieldRegistry } from "./field-registry"
 
 const PHONE_URL_HOSTED = "https://voicefield.dev"
 
+function isPrivateOrigin(hostname: string): boolean {
+  if (hostname === "localhost" || hostname === "127.0.0.1" || hostname === "::1") return true
+  if (hostname.startsWith("192.168.") || hostname.startsWith("10.")) return true
+  if (/^172\.(1[6-9]|2\d|3[01])\./.test(hostname)) return true
+  return false
+}
+
 export interface UseVoicefieldReturn {
   sessionId: string | null
   pairingCode: string | null
@@ -47,12 +54,16 @@ export function useVoicefield(config: VoicefieldConfig): UseVoicefieldReturn {
   const eventSourceRef = useRef<EventSource | null>(null)
   const rotationTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
+  const originIsPublic = typeof window !== "undefined"
+    && !isPrivateOrigin(window.location.hostname)
+
   const externalServerUrl = config.externalServerUrl
+    || (originIsPublic ? window.location.origin + serverUrl : null)
     || detectedExternalUrl
     || (typeof window !== "undefined" ? window.location.origin + serverUrl : serverUrl)
 
   useEffect(() => {
-    if (config.externalServerUrl) return
+    if (config.externalServerUrl || originIsPublic) return
     fetch(`${serverUrl}/network-info`)
       .then((r) => r.json())
       .then((data: { lan?: string[] }) => {
@@ -61,10 +72,11 @@ export function useVoicefield(config: VoicefieldConfig): UseVoicefieldReturn {
         }
       })
       .catch(() => {})
-  }, [serverUrl, config.externalServerUrl])
+  }, [serverUrl, config.externalServerUrl, originIsPublic])
 
   const resolveExternalUrl = useCallback(async (): Promise<string> => {
     if (config.externalServerUrl) return config.externalServerUrl
+    if (originIsPublic) return window.location.origin + serverUrl
     if (detectedExternalUrl) return detectedExternalUrl
     try {
       const r = await fetch(`${serverUrl}/network-info`)
@@ -75,7 +87,7 @@ export function useVoicefield(config: VoicefieldConfig): UseVoicefieldReturn {
       }
     } catch {}
     return typeof window !== "undefined" ? window.location.origin + serverUrl : serverUrl
-  }, [serverUrl, config.externalServerUrl, detectedExternalUrl])
+  }, [serverUrl, config.externalServerUrl, detectedExternalUrl, originIsPublic])
 
   const createNewSession = useCallback(async () => {
     const fields = registryRef.current.getFields()

@@ -25,7 +25,7 @@ Scan a QR code → speak into your phone → text appears in the web field. Real
                                └──────────────────────┘
 ```
 
-- **No audio leaves the phone** — STT runs in the phone browser
+- **No audio leaves the phone** — STT runs in the phone browser via Soniox SDK
 - **Your server is the relay** — only text passes through, with short-lived sessions
 - **voicefield.dev just serves the phone page** — zero data, pure static
 
@@ -59,18 +59,27 @@ const { GET, POST, OPTIONS } = createVoicefieldHandler({
 export { GET, POST, OPTIONS }
 ```
 
-### 2. Use in your component
+### 2. Mount the phone page (for local dev)
+
+```tsx
+// app/mic/page.tsx
+"use client"
+export { Mic as default } from "@voicefield/react/phone"
+```
+
+### 3. Use in your component
 
 ```tsx
 import { useVoicefield, QRPopup } from '@voicefield/react'
 
 function MyComponent() {
+  const inputRef = useRef<HTMLInputElement>(null)
+
   const vf = useVoicefield({
     serverUrl: '/api/voice',
     language: 'en',
   })
 
-  const inputRef = useRef<HTMLInputElement>(null)
   vf.register('search', 'Search', inputRef)
 
   return (
@@ -90,28 +99,42 @@ function MyComponent() {
 }
 ```
 
-## Packages
+That's it. 3 files, and any web field has voice input.
 
-| Package | Description |
-|---------|-------------|
-| `@voicefield/core` | Types and utilities (zero deps) |
-| `@voicefield/react` | React hook + QR popup component |
-| `@voicefield/server` | Next.js API route handler (relay) |
+## Example App
 
-## Deployment modes
+A working example lives in [`apps/example/`](apps/example/). Two fields (title + body) with voice input:
 
-### Local development (no ngrok needed)
-
-For local dev, mount the phone page in your own app and let Voicefield auto-detect your LAN IP:
-
-```tsx
-// app/mic/page.tsx — one line
-"use client"
-export { Mic as default } from "@voicefield/react/phone"
+```bash
+pnpm install && pnpm build
+cp apps/example/.env.local.example apps/example/.env.local
+# Add your SONIOX_API_KEY (free at https://soniox.com)
+cd apps/example && pnpm dev
 ```
 
+## Packages
+
+| Package | Description | npm |
+|---------|-------------|-----|
+| [`@voicefield/core`](packages/core/) | Types and utilities (zero deps) | [![npm](https://img.shields.io/npm/v/@voicefield/core)](https://npmjs.com/package/@voicefield/core) |
+| [`@voicefield/react`](packages/react/) | React hook + QR popup + phone page | [![npm](https://img.shields.io/npm/v/@voicefield/react)](https://npmjs.com/package/@voicefield/react) |
+| [`@voicefield/server`](packages/server/) | Next.js API route handler (relay) | [![npm](https://img.shields.io/npm/v/@voicefield/server)](https://npmjs.com/package/@voicefield/server) |
+
+## Deployment Modes
+
+| Mode | Phone page | Server | HTTPS | Setup effort |
+|------|-----------|--------|-------|-------------|
+| **Local (LAN)** | Your `/mic` page | localhost | Not needed | Zero |
+| **ngrok** | voicefield.dev | ngrok tunnel | Automatic | 1 command |
+| **mkcert** | Your `/mic` page | localhost + cert | Manual | Phone CA install |
+| **Production** | voicefield.dev | Your domain | Let's Encrypt | Standard deploy |
+| **Self-hosted** | Your domain | Your domain | Let's Encrypt | Deploy both |
+
+### Local development (no tunnel needed)
+
+For local dev, mount the phone page in your app and let Voicefield auto-detect your LAN IP:
+
 ```tsx
-// In your component
 const vf = useVoicefield({
   serverUrl: '/api/voice',
   phoneUrl: '',        // local mode — uses your server's /mic page
@@ -119,52 +142,80 @@ const vf = useVoicefield({
 })
 ```
 
-The QR code will point to `http://192.168.x.x:PORT/mic` — your phone connects directly over WiFi. No tunnel, no HTTPS needed (localhost gets `getUserMedia` without HTTPS).
+The QR code points to `http://192.168.x.x:PORT/mic` — phone connects over WiFi.
 
-The LAN IP is auto-detected via the `/api/voice/network-info` endpoint. To override (e.g., multiple network adapters):
+**Note**: Real phones need HTTPS for microphone access. Use ngrok for dev:
 
-```env
-NEXT_PUBLIC_VOICEFIELD_EXTERNAL_URL=http://192.168.1.50:3000/api/voice
+```bash
+ngrok http 3000
+# Set: NEXT_PUBLIC_VOICEFIELD_EXTERNAL_URL=https://abc123.ngrok-free.app/api/voice
 ```
 
-### Hosted mode (zero setup for phone page)
-
-Use `voicefield.dev` to serve the phone page — your server is still the relay:
+### Production (hosted phone page)
 
 ```tsx
 const vf = useVoicefield({
   serverUrl: '/api/voice',
   // phoneUrl defaults to https://voicefield.dev
-  externalServerUrl: 'https://myapp.com/api/voice',  // phone must reach this
   language: 'en',
 })
 ```
 
-The phone loads `voicefield.dev/mic` (static, open source, no data stored), but all API calls go to **your** server.
+Phone loads `voicefield.dev/mic` (static, open source), all API calls go to **your** server.
 
-### Self-hosted phone page
+## Security
 
-Deploy the phone page yourself for full control:
+- **Audio stays on the phone** — STT runs client-side, only text is relayed
+- **In-memory sessions** — no database, no persistence, 30-min TTL
+- **Cryptographic pairing** — 256-bit secret in QR, 384-bit session token
+- **Single-use codes** — 6-digit pairing code deleted after use
+- **Your server controls everything** — Soniox keys generated on your infra
 
-```tsx
-const vf = useVoicefield({
-  serverUrl: '/api/voice',
-  phoneUrl: 'https://voice.mycompany.com',
-  language: 'en',
-})
-```
+See [Security Model](docs/security.md) for the full threat model and design.
 
-The phone page source is in `apps/web/` — deploy it anywhere static (Cloudflare Pages, Vercel, GitHub Pages).
+## Documentation
+
+| Document | Description |
+|----------|-------------|
+| [Architecture](docs/architecture.md) | System design, data flow, design decisions |
+| [Security](docs/security.md) | Threat model, auth flow, crypto primitives |
+| [Deployment](docs/deployment.md) | Detailed setup for all deployment modes |
+| [Troubleshooting](docs/troubleshooting.md) | Common issues and fixes |
 
 ## Why this architecture?
 
-**No audio leaves the phone.** Speech-to-text runs entirely in the phone browser (via Soniox SDK). The server only relays recognized text — never audio.
-
-**Your server, your data.** The relay runs on your infrastructure. Sessions are in-memory with short TTLs (30 min sliding, 24h hard max). No database, no persistence.
-
-**voicefield.dev stores nothing.** It serves a static SPA (the phone page). When a phone loads `voicefield.dev/mic?server=yourapp.com&code=123456`, all API calls go to `yourapp.com` — voicefield.dev never sees the transcript.
-
 **Why not just use the browser's SpeechRecognition API?** Browser support is inconsistent, accuracy varies wildly, and it doesn't work cross-origin. Voicefield uses the phone's microphone (better hardware) with a professional STT engine (Soniox), giving consistent, high-quality results across all devices.
+
+**Why a relay server?** The phone needs an STT key (temporary, generated by your server) and a way to send transcripts to the desktop. The relay is minimal — in-memory, no persistence, only text passes through.
+
+**Why voicefield.dev?** The phone page needs HTTPS for microphone access. Rather than making every developer set up HTTPS locally, the phone loads its UI from voicefield.dev (static, open source) while making all API calls to your server. For production, you can self-host the phone page.
+
+## Development
+
+```bash
+# Clone and install
+git clone https://github.com/tatargabor/voicefield.git
+cd voicefield
+pnpm install
+
+# Build all packages
+pnpm build
+
+# Run example app
+cd apps/example
+cp .env.local.example .env.local
+# Add SONIOX_API_KEY
+pnpm dev
+```
+
+### Publishing
+
+```bash
+# Always use pnpm (resolves workspace: protocol)
+cd packages/core && pnpm publish --access public
+cd packages/react && pnpm publish --access public
+cd packages/server && pnpm publish --access public
+```
 
 ## License
 

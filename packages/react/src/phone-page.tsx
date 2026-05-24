@@ -314,14 +314,16 @@ export function Mic() {
     pair(code)
   }
 
-  const s = styles
-
   if (pageState === "code_entry") {
     return (
-      <div style={s.container}>
-        <h1 style={s.title}>Voicefield</h1>
-        <p style={s.subtitle}>Enter the code shown on your desktop</p>
-        <div style={s.formWrap}>
+      <div style={s.page}>
+        <style>{css}</style>
+        <div style={s.card}>
+          <div style={s.logoRow}>
+            <span style={s.logoIcon}>🎤</span>
+            <span style={s.logoText}>voicefield</span>
+          </div>
+          <p style={s.cardSub}>Enter the code shown on your desktop</p>
           <input
             type="text"
             inputMode="numeric"
@@ -338,111 +340,261 @@ export function Mic() {
             style={s.codeInput}
             autoFocus
           />
-          <button onClick={handleCodeSubmit} style={s.connectBtn}>Connect</button>
+          <button onClick={handleCodeSubmit} style={s.primaryBtn}>Connect</button>
           {!serverUrl && (
             <input
               type="url"
               placeholder="Server URL (from QR code)"
               onChange={(e) => { setServerUrl(e.target.value); serverUrlRef.current = e.target.value }}
-              style={{ ...s.codeInput, fontSize: 14, letterSpacing: "normal" }}
+              style={s.urlInput}
             />
           )}
+          {error && <div style={s.errorBox}>{error}</div>}
         </div>
-        {error && <div style={s.errorBox}>{error}</div>}
       </div>
     )
   }
 
+  const isRec = pageState === "recording"
+
   return (
-    <div style={s.container}>
-      <h1 style={{ fontSize: 20, fontWeight: 600, marginBottom: 4 }}>Voicefield</h1>
+    <div style={s.page}>
+      <style>{css}</style>
+      <div style={s.recordingPage}>
+        <div style={s.logoRow}>
+          <span style={{ fontSize: 18 }}>🎤</span>
+          <span style={{ fontSize: 16, fontWeight: 600 }}>voicefield</span>
+        </div>
 
-      {fields.length > 1 && (
-        <select
-          value={activeFieldId ?? ""}
-          onChange={(e) => setActiveFieldId(e.target.value)}
-          style={{ marginBottom: 16, padding: "8px 12px", borderRadius: 8, border: "1px solid #ddd", fontSize: 14 }}
+        {fields.length > 1 && (
+          <select
+            value={activeFieldId ?? ""}
+            onChange={(e) => setActiveFieldId(e.target.value)}
+            style={s.fieldSelect}
+          >
+            {fields.map((f) => <option key={f.id} value={f.id}>{f.label}</option>)}
+          </select>
+        )}
+        {fields.length === 1 && (
+          <div style={s.fieldBadge}>{fields[0].label}</div>
+        )}
+
+        <button
+          onClick={() => isRec ? stopRecording() : startRecording()}
+          className={isRec ? "mic-btn recording" : "mic-btn"}
+          aria-label={isRec ? "Stop recording" : "Start recording"}
         >
-          {fields.map((f) => <option key={f.id} value={f.id}>{f.label}</option>)}
-        </select>
-      )}
-      {fields.length === 1 && (
-        <p style={{ fontSize: 14, color: "#888", marginBottom: 16 }}>{fields[0].label}</p>
-      )}
+          <span className="mic-btn-inner">
+            {isRec ? (
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="white"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>
+            ) : (
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/>
+                <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+                <line x1="12" x2="12" y1="19" y2="22"/>
+              </svg>
+            )}
+          </span>
+        </button>
 
-      <button
-        onClick={() => pageState === "recording" ? stopRecording() : startRecording()}
-        style={{
-          width: 128, height: 128, borderRadius: "50%", border: "none", cursor: "pointer",
-          fontSize: 48, display: "flex", alignItems: "center", justifyContent: "center",
-          color: "#fff", transition: "all 0.2s",
-          background: pageState === "recording" ? "#ef4444" : "#2563eb",
-          boxShadow: pageState === "recording"
-            ? "0 0 0 8px rgba(239,68,68,0.2)"
-            : "0 4px 12px rgba(37,99,235,0.3)",
-          animation: pageState === "recording" ? "pulse 2s infinite" : "none",
-        }}
-        aria-label={pageState === "recording" ? "Stop recording" : "Start recording"}
-      >
-        {pageState === "recording" ? "⏹" : "🎤"}
-      </button>
+        <p style={{ fontSize: 14, color: "#888", marginTop: 12 }}>
+          {isRec ? "Tap to stop" : "Tap to speak"}
+        </p>
 
-      <p style={{ marginTop: 12, fontSize: 14, color: "#888" }}>
-        {pageState === "recording" ? "Tap to stop" : "Tap to speak"}
-      </p>
+        <div style={s.transcriptBox}>
+          {transcript && <p style={{ fontSize: 15, margin: 0, lineHeight: 1.5 }}>{transcript}</p>}
+          {partialText && <p style={{ fontSize: 15, margin: 0, fontStyle: "italic", color: "#888", lineHeight: 1.5 }}>{partialText}</p>}
+          {!transcript && !partialText && (
+            <p style={{ fontSize: 14, color: "#bbb", textAlign: "center", margin: 0 }}>
+              {isRec ? "Listening..." : "Transcript appears here"}
+            </p>
+          )}
+        </div>
 
-      <div style={s.transcriptBox}>
-        {transcript && <p style={{ fontSize: 14 }}>{transcript}</p>}
-        {partialText && <p style={{ fontSize: 14, fontStyle: "italic", color: "#888" }}>{partialText}</p>}
-        {!transcript && !partialText && (
-          <p style={{ fontSize: 14, color: "#aaa", textAlign: "center" }}>
-            {pageState === "recording" ? "Listening..." : "Transcript appears here"}
-          </p>
-        )}
+        <div style={s.statusRow}>
+          <span className={isRec ? "status-dot recording" : "status-dot"} />
+          <span style={{ fontSize: 13, color: "#888" }}>{isRec ? "Recording" : "Connected"}</span>
+          {!wakeLockActive && isRec && (
+            <span style={{ fontSize: 12, color: "#d97706", marginLeft: 8 }}>Keep screen on</span>
+          )}
+        </div>
+
+        {error && <div style={s.errorBox}>{error}</div>}
       </div>
-
-      <div style={{ marginTop: 16, display: "flex", alignItems: "center", gap: 8, fontSize: 12, color: "#888" }}>
-        <span style={{
-          width: 8, height: 8, borderRadius: "50%",
-          background: pageState === "recording" ? "#ef4444" : "#22c55e",
-          animation: pageState === "recording" ? "pulse 2s infinite" : "none",
-        }} />
-        <span>{pageState === "recording" ? "Recording" : "Connected"}</span>
-        {!wakeLockActive && pageState === "recording" && (
-          <span style={{ color: "#d97706", marginLeft: 8 }}>Keep screen on</span>
-        )}
-      </div>
-
-      {error && <div style={s.errorBox}>{error}</div>}
-
-      <style>{`@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.7; } }`}</style>
     </div>
   )
 }
 
-const styles = {
-  container: {
-    display: "flex", flexDirection: "column" as const, alignItems: "center",
-    justifyContent: "center", minHeight: "100vh", padding: 24,
-  },
-  title: { fontSize: 28, fontWeight: 700 as const, marginBottom: 8 },
-  subtitle: { fontSize: 16, color: "#666", marginBottom: 24, textAlign: "center" as const },
-  formWrap: { width: "100%", maxWidth: 320, display: "flex", flexDirection: "column" as const, gap: 12 },
+const s = {
+  page: {
+    minHeight: "100vh",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    padding: 20,
+    background: "linear-gradient(180deg, #f8fafc 0%, #eef2ff 100%)",
+    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+  } as const,
+  card: {
+    width: "100%",
+    maxWidth: 360,
+    background: "#fff",
+    borderRadius: 20,
+    padding: "40px 28px 32px",
+    boxShadow: "0 8px 40px rgba(0, 0, 0, 0.08)",
+    display: "flex",
+    flexDirection: "column" as const,
+    alignItems: "center",
+    gap: 16,
+  } as const,
+  recordingPage: {
+    width: "100%",
+    maxWidth: 380,
+    display: "flex",
+    flexDirection: "column" as const,
+    alignItems: "center",
+    gap: 8,
+  } as const,
+  logoRow: {
+    display: "flex",
+    alignItems: "center",
+    gap: 8,
+    marginBottom: 8,
+  } as const,
+  logoIcon: { fontSize: 24 } as const,
+  logoText: { fontSize: 20, fontWeight: 700 } as const,
+  cardSub: {
+    fontSize: 15,
+    color: "#666",
+    textAlign: "center" as const,
+    margin: "0 0 8px",
+  } as const,
   codeInput: {
-    width: "100%", textAlign: "center" as const, fontSize: 28, fontFamily: "monospace",
-    letterSpacing: "0.15em", padding: "16px 0", border: "2px solid #e5e7eb",
-    borderRadius: 12, outline: "none",
-  },
-  connectBtn: {
-    width: "100%", padding: "14px 0", background: "#2563eb", color: "#fff",
-    fontWeight: 600 as const, fontSize: 16, border: "none", borderRadius: 12, cursor: "pointer",
-  },
+    width: "100%",
+    textAlign: "center" as const,
+    fontSize: 32,
+    fontFamily: '"SF Mono", "Fira Code", monospace',
+    letterSpacing: "0.15em",
+    padding: "16px 0",
+    border: "2px solid #e5e7eb",
+    borderRadius: 14,
+    outline: "none",
+    transition: "border-color 0.2s",
+    background: "#fafafa",
+  } as const,
+  urlInput: {
+    width: "100%",
+    textAlign: "center" as const,
+    fontSize: 14,
+    padding: "12px 16px",
+    border: "1px solid #e5e7eb",
+    borderRadius: 10,
+    outline: "none",
+    color: "#555",
+  } as const,
+  primaryBtn: {
+    width: "100%",
+    padding: "14px 0",
+    background: "#2563eb",
+    color: "#fff",
+    fontWeight: 600 as const,
+    fontSize: 16,
+    border: "none",
+    borderRadius: 14,
+    cursor: "pointer",
+    transition: "background 0.15s",
+  } as const,
+  fieldSelect: {
+    marginBottom: 12,
+    padding: "8px 16px",
+    borderRadius: 10,
+    border: "1px solid #e5e7eb",
+    fontSize: 14,
+    background: "#fff",
+    outline: "none",
+  } as const,
+  fieldBadge: {
+    fontSize: 13,
+    color: "#2563eb",
+    background: "#dbeafe",
+    padding: "4px 12px",
+    borderRadius: 20,
+    fontWeight: 500,
+    marginBottom: 16,
+  } as const,
   transcriptBox: {
-    marginTop: 24, width: "100%", maxWidth: 380, minHeight: 80,
-    padding: 16, border: "1px solid #e5e7eb", borderRadius: 12, background: "#f9fafb",
-  },
+    marginTop: 20,
+    width: "100%",
+    minHeight: 80,
+    padding: 20,
+    border: "1px solid #e5e7eb",
+    borderRadius: 16,
+    background: "#fff",
+    boxShadow: "0 2px 8px rgba(0, 0, 0, 0.04)",
+  } as const,
+  statusRow: {
+    marginTop: 16,
+    display: "flex",
+    alignItems: "center",
+    gap: 8,
+  } as const,
   errorBox: {
-    marginTop: 16, padding: 12, background: "#fef2f2", border: "1px solid #fecaca",
-    borderRadius: 12, fontSize: 14, color: "#b91c1c", maxWidth: 380, width: "100%", textAlign: "center" as const,
-  },
-} as const
+    marginTop: 16,
+    padding: "12px 16px",
+    background: "#fef2f2",
+    border: "1px solid #fecaca",
+    borderRadius: 12,
+    fontSize: 14,
+    color: "#b91c1c",
+    width: "100%",
+    textAlign: "center" as const,
+  } as const,
+}
+
+const css = `
+  .mic-btn {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    border: none;
+    cursor: pointer;
+    background: #2563eb;
+    box-shadow: 0 8px 24px rgba(37, 99, 235, 0.3);
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 16px;
+  }
+  .mic-btn:active {
+    transform: scale(0.95);
+  }
+  .mic-btn.recording {
+    background: #ef4444;
+    box-shadow: 0 0 0 8px rgba(239, 68, 68, 0.15), 0 8px 24px rgba(239, 68, 68, 0.3);
+    animation: mic-pulse 2s ease-in-out infinite;
+  }
+  .mic-btn-inner {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #22c55e;
+  }
+  .status-dot.recording {
+    background: #ef4444;
+    animation: dot-pulse 1.5s ease-in-out infinite;
+  }
+  @keyframes mic-pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.03); }
+  }
+  @keyframes dot-pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+`

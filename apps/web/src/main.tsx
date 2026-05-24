@@ -3,6 +3,7 @@ import { createRoot } from "react-dom/client"
 import { BrowserRouter, Routes, Route } from "react-router-dom"
 import { Landing } from "./pages/landing"
 import { Mic } from "./pages/mic"
+import "./landing.css"
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>

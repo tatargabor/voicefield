@@ -15,6 +15,34 @@ importers:
         specifier: ^5.7.0
         version: 5.9.3
 
+  apps/example:
+    dependencies:
+      '@soniox/node':
+        specifier: ^1.1.0
+        version: 1.1.2
+      '@voicefield/react':
+        specifier: workspace:^
+        version: link:../../packages/react
+      '@voicefield/server':
+        specifier: workspace:^
+        version: link:../../packages/server
+      next:
+        specifier: ^15.0.0
+        version: 15.5.18(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
+      react:
+        specifier: ^19.0.0
+        version: 19.2.6
+      react-dom:
+        specifier: ^19.0.0
+        version: 19.2.6(react@19.2.6)
+    devDependencies:
+      '@types/react':
+        specifier: ^19.0.0
+        version: 19.2.15
+      typescript:
+        specifier: ^5.7.0
+        version: 5.9.3
+
   apps/web:
     dependencies:
       '@soniox/client':
@@ -683,6 +711,9 @@ packages:
 
   '@soniox/client@2.1.0':
     resolution: {integrity: sha512-j+LkI0uKyQKLcwlsdd0Vhd7SWbIgEI0fMOcHWrcvSgW1rF7EOE3A2vD64/Fzng9k6b86t/3JXXyiJeDlPJkesw==}
+
+  '@soniox/node@1.1.2':
+    resolution: {integrity: sha512-VVxwOW5KntJPHve2PxjdMYh+NpyaaqHr2eLqbp+zy/ajhtgOITy+zUSg6jnoIu4YylSK4+yl8yDgC3qy5XKkRw==}
 
   '@soniox/node@2.1.0':
     resolution: {integrity: sha512-RkcxFv7YOHSkUW5T0RjVDtljwoX/g0zTaVnDVMtZoBDoltBhx1+s5lUZkXptbhQInpgQ0x2Q2m2/F78qAorsBw==}
@@ -1553,6 +1584,8 @@ snapshots:
     optional: true
 
   '@soniox/client@2.1.0': {}
+
+  '@soniox/node@1.1.2': {}
 
   '@soniox/node@2.1.0': {}
 
