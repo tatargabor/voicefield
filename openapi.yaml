@@ -1,0 +1,412 @@
+openapi: 3.1.0
+info:
+  title: Voicefield API
+  version: 0.1.9
+  description: >
+    Relay server API for Voicefield — voice-enables any web field by pairing a
+    phone (running client-side STT) with a desktop browser via short-lived sessions.
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  - url: /api/voice
+    description: Default Next.js API route mount point
+
+paths:
+  /session:
+    post:
+      operationId: createSession
+      summary: Create a new pairing session
+      description: >
+        Creates a session with a 6-digit pairing code and 256-bit secret.
+        The session expires in 5 minutes if not paired.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                fields:
+                  type: array
+                  items:
+                    $ref: "#/components/schemas/VoiceField"
+                  default:
+                    - id: default
+                      label: Default
+                language:
+                  oneOf:
+                    - type: string
+                    - type: array
+                      items:
+                        type: string
+                  default: "en"
+      responses:
+        "200":
+          description: Session created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SessionCreateResponse"
+        "503":
+          description: STT not configured
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /pair:
+    post:
+      operationId: pairSession
+      summary: Pair phone to session using pairing code
+      description: >
+        Phone submits the 6-digit code (and optionally the secret from QR).
+        Returns a Bearer token, temporary STT key, field list, and config.
+        The pairing code is single-use and deleted after successful pairing.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [code]
+              properties:
+                code:
+                  type: string
+                  pattern: "^\\d{6}$"
+                  description: 6-digit pairing code
+                secret:
+                  type: string
+                  description: 256-bit hex secret from QR URL (optional verification)
+      responses:
+        "200":
+          description: Paired successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PairingResponse"
+        "400":
+          description: Invalid code or secret mismatch
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "500":
+          description: STT key generation failed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /transcript:
+    post:
+      operationId: postTranscript
+      summary: Phone sends transcript or recording state
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              oneOf:
+                - type: object
+                  required: [text, isFinal]
+                  properties:
+                    text:
+                      type: string
+                    isFinal:
+                      type: boolean
+                    fieldId:
+                      type: string
+                      default: default
+                - type: object
+                  required: [recordingState]
+                  properties:
+                    recordingState:
+                      type: string
+                      enum: [start, stop]
+      responses:
+        "200":
+          description: Accepted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                  commands:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/SessionCommand"
+        "401":
+          description: Unauthorized (missing or invalid Bearer token)
+
+    get:
+      operationId: subscribeTranscripts
+      summary: Desktop subscribes to transcript stream (SSE)
+      parameters:
+        - name: sessionId
+          in: query
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: SSE event stream
+          content:
+            text/event-stream:
+              schema:
+                type: string
+                description: >
+                  Newline-delimited SSE events. Each `data:` line contains JSON
+                  with a `type` field (connected, paired, transcript,
+                  recording_start, recording_stop, session_ended, field_switched).
+        "400":
+          description: Missing sessionId
+        "404":
+          description: Session not found or expired
+
+  /session/end:
+    post:
+      operationId: endSession
+      summary: End an active session
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [sessionId]
+              properties:
+                sessionId:
+                  type: string
+                  format: uuid
+      responses:
+        "200":
+          description: Session ended
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+        "404":
+          description: Session not found or already expired
+
+  /command:
+    post:
+      operationId: sendCommand
+      summary: Desktop sends command to phone (e.g. switch active field)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [sessionId, type, fieldId]
+              properties:
+                sessionId:
+                  type: string
+                  format: uuid
+                type:
+                  type: string
+                  enum: [switch_field]
+                fieldId:
+                  type: string
+      responses:
+        "200":
+          description: Command queued
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+        "404":
+          description: Session not found or not active
+
+  /refresh-key:
+    post:
+      operationId: refreshSTTKey
+      summary: Phone requests a fresh temporary STT key
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: New key issued
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  sonioxTempKey:
+                    type: string
+                  expiresAt:
+                    type: integer
+                    description: Unix timestamp (ms)
+        "401":
+          description: Unauthorized
+        "503":
+          description: STT not configured
+
+  /status:
+    get:
+      operationId: getStatus
+      summary: Phone polls session state and drains pending commands
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Current session state
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  state:
+                    $ref: "#/components/schemas/SessionState"
+                  fields:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/VoiceField"
+                  commands:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/SessionCommand"
+        "401":
+          description: Unauthorized
+
+  /network-info:
+    get:
+      operationId: getNetworkInfo
+      summary: Returns LAN addresses for local dev QR generation
+      responses:
+        "200":
+          description: Network info
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  lan:
+                    type: array
+                    items:
+                      type: string
+                      format: uri
+                    description: Full base URLs reachable over LAN
+                  localhost:
+                    type: string
+                    format: uri
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      description: Session token returned from /pair
+
+  schemas:
+    VoiceField:
+      type: object
+      required: [id, label]
+      properties:
+        id:
+          type: string
+        label:
+          type: string
+
+    SessionState:
+      type: string
+      enum: [created, paired, active, expired]
+
+    SessionCommand:
+      type: object
+      required: [type, fieldId]
+      properties:
+        type:
+          type: string
+          enum: [switch_field]
+        fieldId:
+          type: string
+
+    SessionCreateResponse:
+      type: object
+      properties:
+        sessionId:
+          type: string
+          format: uuid
+        pairingCode:
+          type: string
+          pattern: "^\\d{6}$"
+        secret:
+          type: string
+          description: 256-bit hex string
+        expiresAt:
+          type: integer
+          description: Unix timestamp (ms)
+
+    PairingResponse:
+      type: object
+      properties:
+        sessionToken:
+          type: string
+        sonioxTempKey:
+          type: string
+        sonioxKeyExpiresAt:
+          type: integer
+        fields:
+          type: array
+          items:
+            $ref: "#/components/schemas/VoiceField"
+        language:
+          oneOf:
+            - type: string
+            - type: array
+              items:
+                type: string
+        config:
+          type: object
+          properties:
+            maxRecordingDuration:
+              type: integer
+            idleTimeout:
+              type: integer
+
+    SSEEvent:
+      oneOf:
+        - type: object
+          required: [type, text, isFinal, fieldId]
+          properties:
+            type:
+              const: transcript
+            text:
+              type: string
+            isFinal:
+              type: boolean
+            fieldId:
+              type: string
+        - type: object
+          required: [type]
+          properties:
+            type:
+              type: string
+              enum:
+                [connected, paired, recording_start, recording_stop, session_ended, field_switched]
+            sessionId:
+              type: string
+            fieldId:
+              type: string
+
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+        code:
+          type: string
+          enum: [NOT_CONFIGURED, VALIDATION_ERROR, INVALID_CODE, STT_ERROR]
