@@ -2,18 +2,37 @@
 
 ## Purpose
 
-The phone-side speech-to-text client. Runs entirely in the phone's browser using the Soniox SDK — audio never leaves the device. Manages recording lifecycle, silence detection, transcript submission, and STT key refresh.
+The phone-side speech-to-text client. Runs entirely in the phone's browser using a pluggable STT provider — audio never leaves the device. Manages recording lifecycle, silence detection, transcript submission, STT key refresh, and provider selection.
 
 ## Requirements
 
 ### Requirement: Client-Side STT
 
-The system SHALL perform speech-to-text processing entirely on the phone's browser using the Soniox WebSocket SDK. No audio data SHALL be sent to the voicefield relay server.
+The system SHALL perform speech-to-text processing entirely on the phone's browser using the configured STT provider. No audio data SHALL be sent to the voicefield relay server.
 
 #### Scenario: Audio processing
 - **GIVEN** the phone is recording
 - **WHEN** the user speaks
-- **THEN** audio is processed by Soniox client-side, producing partial and final transcript segments
+- **THEN** audio is processed by the selected STT provider client-side, producing partial and final transcript segments
+
+### Requirement: Provider Selection
+
+The phone page SHALL select the STT provider based on the `sttProvider` field returned in the pairing response.
+
+#### Scenario: Soniox provider selected
+- **GIVEN** the pair response contains `sttProvider: "soniox"` and a valid `sttKey`
+- **WHEN** recording starts
+- **THEN** the Soniox provider factory is used
+
+#### Scenario: Web Speech provider selected
+- **GIVEN** the pair response contains `sttProvider: "web-speech"` and `sttKey: null`
+- **WHEN** recording starts
+- **THEN** the Web Speech API provider factory is used
+
+#### Scenario: Unknown provider
+- **GIVEN** the pair response contains an unrecognized `sttProvider` value
+- **WHEN** recording starts
+- **THEN** an error is displayed to the user
 
 ### Requirement: Phone Page State Machine
 
@@ -63,37 +82,76 @@ The system SHALL enforce recording duration limits to prevent runaway sessions.
 The phone SHALL send transcript segments to the relay server as they are produced.
 
 #### Scenario: Partial transcript
-- **GIVEN** the phone is recording and Soniox produces a partial result
-- **WHEN** the partial text is received
+- **GIVEN** the phone is recording and the STT provider produces a partial result
+- **WHEN** the partial text is received via `onPartial` callback
 - **THEN** it is sent via POST /transcript with `isFinal: false` and the current fieldId
 
 #### Scenario: Final transcript
-- **GIVEN** the phone is recording and Soniox produces a final result
-- **WHEN** the final text is received
+- **GIVEN** the phone is recording and the STT provider produces a final result
+- **WHEN** the final text is received via `onFinal` callback
 - **THEN** it is sent via POST /transcript with `isFinal: true` and the current fieldId
 
 ### Requirement: STT Key Refresh
 
-The phone SHALL proactively refresh its temporary STT API key before it expires.
+The phone SHALL proactively refresh its temporary STT API key before it expires, when using a provider that requires one.
 
 #### Scenario: Key approaching expiry
-- **GIVEN** the phone has a temporary Soniox key with known expiry
+- **GIVEN** the phone has a temporary STT key with known expiry
 - **WHEN** the key is within 5 minutes of expiring
 - **THEN** the phone calls POST /refresh-key to obtain a new key
 
+#### Scenario: No key needed
+- **GIVEN** the provider does not require an API key (e.g., web-speech)
+- **WHEN** the session is active
+- **THEN** no key refresh is attempted
+
 ### Requirement: Field Selection
 
-The phone SHALL display a field selector when multiple fields are registered, and respond to field switch commands from the desktop.
+The phone SHALL display a field selector when multiple fields are registered, and respond to field switch commands from the desktop. The field selector SHALL use a horizontal pill/chip bar instead of a native dropdown, showing all fields simultaneously with the active field visually highlighted.
 
 #### Scenario: Multiple fields
-- **GIVEN** the session has multiple registered fields
-- **WHEN** the phone is in `paired` or `recording` state
-- **THEN** a field selector is displayed allowing the user to choose which field receives dictation
+
+- **WHEN** the session has multiple registered fields and the phone is in `paired` or `recording` state
+- **THEN** a horizontal row of pill-shaped buttons is displayed, one per field
+- **THEN** the active field's pill SHALL have a filled blue (#2563eb) background with white text
+- **THEN** inactive field pills SHALL have a white background with a border (#e5e7eb) and dark text
+
+#### Scenario: Field selection via pill tap
+
+- **WHEN** the user taps an inactive field pill
+- **THEN** that field becomes active and its pill transitions to the filled/active style
+- **THEN** the previously active pill transitions to the inactive/outlined style
+
+#### Scenario: Many fields overflow
+
+- **WHEN** there are more fields than fit in a single row
+- **THEN** the pill bar SHALL scroll horizontally with momentum scrolling enabled
+- **THEN** no fields SHALL be hidden behind an extra interaction (no dropdown/modal)
+
+#### Scenario: Single field
+
+- **WHEN** the session has exactly one registered field
+- **THEN** a single field badge is displayed (no selector interaction needed)
 
 #### Scenario: Desktop switches field
+
 - **GIVEN** the phone is polling GET /status
 - **WHEN** a `switch_field` command is received
-- **THEN** the phone switches to the specified field
+- **THEN** the phone switches to the specified field and the pill bar updates to reflect the new active field
+
+### Requirement: Consistent Mic Icon
+
+The microphone icon SVG SHALL be identical across the phone page mic button and the desktop example app field buttons. The canonical icon is a Lucide-style mic: a rounded-rect microphone body, a curved pickup arc below, and a vertical stand line.
+
+#### Scenario: Phone mic button icon
+
+- **WHEN** the phone is in `paired` state (not recording)
+- **THEN** the mic button displays the canonical mic SVG icon in white on blue (#2563eb) background
+
+#### Scenario: Desktop field button icon
+
+- **WHEN** a voicefield-enabled field renders its mic button in the example app
+- **THEN** the button displays the same canonical mic SVG icon as the phone page
 
 ### Requirement: Status Polling
 
@@ -120,14 +178,14 @@ The phone SHALL request a screen wake lock to prevent the screen from turning of
 
 ### Requirement: Language Configuration
 
-The phone SHALL pass configured language hints to the Soniox STT engine.
+The phone SHALL pass configured language to the STT provider.
 
 #### Scenario: Single language
 - **GIVEN** language is configured as `"en"`
-- **WHEN** STT is initialized
-- **THEN** `language_hints: ["en"]` is passed to Soniox
+- **WHEN** STT is initialized via provider
+- **THEN** the language is passed to the provider config
 
 #### Scenario: Multiple languages
 - **GIVEN** language is configured as `["en", "es"]`
-- **WHEN** STT is initialized
-- **THEN** `language_hints: ["en", "es"]` is passed to Soniox
+- **WHEN** STT is initialized via provider
+- **THEN** the languages are passed to the provider config

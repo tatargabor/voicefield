@@ -16,14 +16,14 @@ The system SHALL provide a `createVoicefieldHandler` factory function that retur
 - **THEN** GET, POST, and OPTIONS handlers are returned, ready for export
 
 #### Scenario: STT key configuration
-- **GIVEN** a `generateSTTKey` function in config
+- **GIVEN** a `generateSttKey` function in config
 - **WHEN** a phone pairs
-- **THEN** the function is called to generate a temporary Soniox API key
+- **THEN** the function is called to generate a temporary STT API key
 
 #### Scenario: No STT configured
-- **GIVEN** no `generateSTTKey` in config
+- **GIVEN** no `generateSttKey` in config
 - **WHEN** a session is created
-- **THEN** POST /session returns 503 Service Unavailable
+- **THEN** session creation succeeds (no 503). The server will return `sttProvider: "web-speech"` and `sttKey: null` on pairing.
 
 ### Requirement: Route Dispatch
 
