@@ -1,6 +1,6 @@
 {
   "name": "@voicefield/server",
-  "version": "0.1.9",
+  "version": "0.2.0",
   "description": "Voicefield server-side relay for Next.js",
   "type": "module",
   "main": "./dist/index.js",
@@ -22,7 +22,7 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@voicefield/core": "workspace:^"
+    "@voicefield/core": "workspace:^0.2.0"
   },
   "peerDependencies": {
     "next": ">=14.0.0",

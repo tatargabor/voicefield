@@ -75,7 +75,7 @@ done
 # --- Build ---
 
 info "Building all packages..."
-pnpm install --frozen-lockfile
+pnpm install
 pnpm build
 
 # --- Publish to npm (order matters: core first) ---
