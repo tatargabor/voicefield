@@ -63,6 +63,20 @@ export function useVoicefield(config: VoicefieldConfig): UseVoicefieldReturn {
       .catch(() => {})
   }, [serverUrl, config.externalServerUrl])
 
+  const resolveExternalUrl = useCallback(async (): Promise<string> => {
+    if (config.externalServerUrl) return config.externalServerUrl
+    if (detectedExternalUrl) return detectedExternalUrl
+    try {
+      const r = await fetch(`${serverUrl}/network-info`)
+      const data = await r.json() as { lan?: string[] }
+      if (data.lan && data.lan.length > 0) {
+        setDetectedExternalUrl(data.lan[0])
+        return data.lan[0]
+      }
+    } catch {}
+    return typeof window !== "undefined" ? window.location.origin + serverUrl : serverUrl
+  }, [serverUrl, config.externalServerUrl, detectedExternalUrl])
+
   const createNewSession = useCallback(async () => {
     const fields = registryRef.current.getFields()
     const res = await fetch(`${serverUrl}/session`, {
@@ -147,6 +161,7 @@ export function useVoicefield(config: VoicefieldConfig): UseVoicefieldReturn {
   }, [serverUrl])
 
   const showQR = useCallback(async () => {
+    await resolveExternalUrl()
     if (!sessionId || sessionState === "expired" || sessionState === "disconnected") {
       const sid = await createNewSession()
       subscribeSSE(sid)
@@ -160,7 +175,7 @@ export function useVoicefield(config: VoicefieldConfig): UseVoicefieldReturn {
         subscribeSSE(sid)
       }
     }, 5 * 60 * 1000)
-  }, [sessionId, sessionState, createNewSession, subscribeSSE])
+  }, [sessionId, sessionState, createNewSession, subscribeSSE, resolveExternalUrl])
 
   const hideQR = useCallback(() => {
     setIsQRVisible(false)

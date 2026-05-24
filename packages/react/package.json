@@ -1,6 +1,6 @@
 {
   "name": "@voicefield/react",
-  "version": "0.1.6",
+  "version": "0.1.7",
   "description": "React hook and components for Voicefield voice input",
   "type": "module",
   "main": "./dist/index.js",
