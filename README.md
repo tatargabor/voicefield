@@ -178,9 +178,21 @@ See [Security Model](docs/security.md) for the full threat model and design.
 | Document | Description |
 |----------|-------------|
 | [Architecture](docs/architecture.md) | System design, data flow, design decisions |
+| [API Reference](docs/api-reference.md) | All endpoints, request/response shapes, error codes |
 | [Security](docs/security.md) | Threat model, auth flow, crypto primitives |
 | [Deployment](docs/deployment.md) | Detailed setup for all deployment modes |
 | [Troubleshooting](docs/troubleshooting.md) | Common issues and fixes |
+| [Contributing](CONTRIBUTING.md) | Dev setup, branching, code style, testing |
+
+### How-To Guides
+
+| Guide | Description |
+|-------|-------------|
+| [Add voice to Next.js](docs/howto/add-voice-to-nextjs.md) | Step-by-step integration |
+| [Multi-field forms](docs/howto/multi-field-forms.md) | Register multiple fields, field switching |
+| [Controlled inputs](docs/howto/controlled-inputs.md) | Setter function pattern for React state |
+| [Custom STT provider](docs/howto/custom-stt-provider.md) | Replace Soniox with another STT |
+| [Self-host phone page](docs/howto/self-host-phone-page.md) | Deploy your own phone page |
 
 ## Why this architecture?
 
@@ -206,6 +218,18 @@ cd apps/example
 cp .env.local.example .env.local
 # Add SONIOX_API_KEY
 pnpm dev
+```
+
+### Testing & Linting
+
+```bash
+pnpm test           # unit tests (vitest)
+pnpm lint           # eslint
+pnpm format         # prettier
+pnpm format:check   # check formatting
+
+# E2E tests
+cd apps/example && npx playwright test
 ```
 
 ### Publishing

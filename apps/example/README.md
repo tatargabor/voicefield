@@ -2,7 +2,7 @@
 
 Minimal Next.js app demonstrating `@voicefield/react` + `@voicefield/server`.
 
-Two fields (title + body) with voice input. Pair your phone via QR code, speak, and text appears in real-time.
+Two demos — chat (single field) and form (multi-field). Pair your phone via QR code, speak, and text appears in real-time.
 
 ## Setup
 
@@ -26,11 +26,17 @@ Open http://localhost:3000 — click the mic button, scan the QR with your phone
 
 ```
 app/
-├── page.tsx                          ← Homepage with voice demo
-├── components/voice-demo.tsx         ← Client component using useVoicefield
-├── api/voice/[...voicefield]/route.ts ← Server handler (3 lines of setup)
-├── mic/page.tsx                      ← Phone page (1 line)
-└── layout.tsx                        ← Root layout
+├── page.tsx                           ← Homepage (dynamic import)
+├── components/
+│   ├── app.tsx                        ← Tab switcher (chat / form)
+│   ├── chat-demo.tsx                  ← Single-field chat demo
+│   └── form-demo.tsx                  ← Multi-field form demo
+├── api/voice/[...voicefield]/route.ts ← Server handler
+├── mic/page.tsx                       ← Phone page (1 line)
+└── layout.tsx                         ← Root layout
+e2e/
+└── voicefield.spec.ts                 ← Playwright e2e tests
+playwright.config.ts                   ← Playwright config
 ```
 
 ## Development with a real phone
