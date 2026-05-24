@@ -10,7 +10,18 @@ export function createSonioxProvider(config: STTProviderConfig): STTProviderInst
         return
       }
 
-      let SonioxClient: typeof import("@soniox/client").SonioxClient
+      let SonioxClient: new (opts: { api_key: string }) => {
+        realtime: {
+          record(opts: {
+            model: string
+            language_hints: string[]
+            enable_endpoint_detection: boolean
+            signal: AbortSignal
+          }): {
+            on(event: string, handler: (...args: never[]) => void): void
+          }
+        }
+      }
       try {
         const mod = await import("@soniox/client")
         SonioxClient = mod.SonioxClient

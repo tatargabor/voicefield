@@ -45,11 +45,7 @@ Both fields are optional. Defaults: one field `{ id: "default", label: "Default"
 }
 ```
 
-**Errors**:
-
-| Status | Code | When |
-|--------|------|------|
-| 503 | `NOT_CONFIGURED` | `generateSTTKey` not provided |
+Session creation always succeeds, even without `generateSttKey` configured (the phone will use Web Speech API fallback).
 
 ---
 
@@ -73,8 +69,9 @@ Pair a phone to a session using the pairing code and secret.
 ```json
 {
   "sessionToken": "base64url-token",
-  "sonioxTempKey": "temporary-stt-key",
-  "sonioxKeyExpiresAt": 1700000000000,
+  "sttProvider": "soniox",
+  "sttKey": "temporary-stt-key",
+  "sttKeyExpiresAt": 1700000000000,
   "fields": [{ "id": "name", "label": "Name" }],
   "language": "en",
   "config": {
@@ -84,14 +81,15 @@ Pair a phone to a session using the pairing code and secret.
 }
 ```
 
+When no `generateSttKey` is configured on the server, `sttProvider` is `"web-speech"` and `sttKey`/`sttKeyExpiresAt` are `null`.
+
 **Errors**:
 
 | Status | Code | When |
 |--------|------|------|
 | 400 | `VALIDATION_ERROR` | Invalid JSON or bad code format |
 | 400 | `INVALID_CODE` | Code not found, expired, wrong secret, or already paired |
-| 500 | `STT_ERROR` | `generateSTTKey` threw an error |
-| 503 | `NOT_CONFIGURED` | `generateSTTKey` not provided |
+| 500 | `STT_ERROR` | `generateSttKey` threw an error |
 
 ---
 
@@ -254,7 +252,7 @@ Phone requests a fresh STT key (when the current one is about to expire).
 
 ```json
 {
-  "sonioxTempKey": "new-temporary-key",
+  "sttKey": "new-temporary-key",
   "expiresAt": 1700000000000
 }
 ```
@@ -264,8 +262,8 @@ Phone requests a fresh STT key (when the current one is about to expire).
 | Status | Code | When |
 |--------|------|------|
 | 401 | — | Missing or invalid Bearer token |
-| 500 | `STT_ERROR` | `generateSTTKey` threw an error |
-| 503 | `NOT_CONFIGURED` | `generateSTTKey` not provided |
+| 500 | `STT_ERROR` | `generateSttKey` threw an error |
+| 503 | `NOT_CONFIGURED` | `generateSttKey` not provided |
 
 ---
 

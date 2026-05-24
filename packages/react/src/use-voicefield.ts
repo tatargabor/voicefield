@@ -180,7 +180,13 @@ export function useVoicefield(config: VoicefieldConfig): UseVoicefieldReturn {
 
   const showQR = useCallback(async () => {
     await resolveExternalUrl()
-    if (!sessionId || sessionState === "expired" || sessionState === "disconnected") {
+    const needsNewSession =
+      !sessionId ||
+      sessionState === "expired" ||
+      sessionState === "disconnected" ||
+      sessionState === "paired" ||
+      sessionState === "active"
+    if (needsNewSession) {
       const sid = await createNewSession()
       subscribeSSE(sid)
     }

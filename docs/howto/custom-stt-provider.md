@@ -1,87 +1,74 @@
 # How to: Use a Custom STT Provider
 
-Voicefield uses Soniox by default, but the architecture supports any STT service that can run in the browser.
+Voicefield ships with two built-in STT providers:
 
-## Server side: provide a token
+- **`soniox`** — High-quality cloud STT via Soniox WebSocket streaming (requires API key)
+- **`web-speech`** — Browser-native Web Speech API (zero config, no API key needed)
 
-The `generateSTTKey` callback returns whatever auth token your STT provider needs:
+The provider is selected automatically based on server configuration. You can also create your own provider.
+
+## Built-in provider selection
+
+If `generateSttKey` is configured, the server tells the phone to use `"soniox"`. Otherwise, it falls back to `"web-speech"` automatically:
 
 ```typescript
 // app/api/voice/[...voicefield]/route.ts
 import { createVoicefieldHandler } from "@voicefield/server"
 
+// With Soniox (cloud STT)
 const { GET, POST, OPTIONS } = createVoicefieldHandler({
-  generateSTTKey: async () => {
-    // Example: Deepgram
-    const res = await fetch("https://api.deepgram.com/v1/keys/...", {
-      method: "POST",
-      headers: { Authorization: `Token ${process.env.DEEPGRAM_API_KEY}` },
-      body: JSON.stringify({ time_to_live_in_seconds: 1800 }),
+  generateSttKey: async () => {
+    const result = await soniox.auth.createTemporaryKey({
+      usage_type: "transcribe_websocket",
+      expires_in_seconds: 1800,
     })
-    const data = await res.json()
-    return {
-      temporaryApiKey: data.api_key,
-      expiresAt: Date.now() + 1800_000,
-    }
+    return { temporaryApiKey: result.api_key, expiresAt: Date.now() + 1800_000 }
   },
 })
+
+// Without — uses Web Speech API, no key needed
+const { GET, POST, OPTIONS } = createVoicefieldHandler({})
 
 export { GET, POST, OPTIONS }
 ```
 
-## Client side: custom phone page
+## Creating a custom provider
 
-The default phone page (`@voicefield/react/phone`) uses `@soniox/client`. To use a different STT, build a custom phone page that:
+A provider is a factory function that receives config and returns `start()`/`stop()` methods:
 
-1. Gets the temporary key from the pair response (`sonioxTempKey` field)
-2. Opens a WebSocket/connection to your STT service
-3. Streams microphone audio to the STT
-4. POSTs recognized text to the Voicefield relay
+```typescript
+import type { STTProviderConfig, STTProviderInstance } from "@voicefield/core"
 
-```tsx
-// app/mic/page.tsx — custom phone page skeleton
-"use client"
-
-import { useEffect, useState } from "react"
-
-export default function CustomMicPage() {
-  const [sessionToken, setSessionToken] = useState<string | null>(null)
-  const [sttKey, setSttKey] = useState<string | null>(null)
-
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search)
-    const server = params.get("server")
-    const code = params.get("code")
-    const secret = params.get("secret")
-
-    if (server && code) {
-      fetch(`${server}/pair`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ code, secret }),
-      })
-        .then((r) => r.json())
-        .then((data) => {
-          setSessionToken(data.sessionToken)
-          setSttKey(data.sonioxTempKey) // your STT temp key
-          // Now: start your STT with sttKey, send transcripts via:
-          // POST ${server}/transcript { text, isFinal, fieldId }
-          // with Authorization: Bearer ${data.sessionToken}
-        })
-    }
-  }, [])
-
-  return <div>{/* Your custom recording UI */}</div>
+export function createMyProvider(config: STTProviderConfig): STTProviderInstance {
+  return {
+    async start() {
+      // 1. Request microphone access
+      // 2. Connect to your STT service using config.sttKey
+      // 3. On partial results: call config.onPartial(text)
+      // 4. On final results: call config.onFinal(text)
+      // 5. On errors: call config.onError(error)
+    },
+    async stop() {
+      // Clean up: close connections, release mic
+    },
+  }
 }
 ```
 
+The `config` object includes:
+- `sttKey: string | null` — API key from the server (null for keyless providers)
+- `language: string | string[]` — BCP 47 language codes
+- `onPartial(text)` — Call with interim recognition results
+- `onFinal(text)` — Call with finalized text
+- `onError(error)` — Call when something goes wrong
+
 ## What you keep from Voicefield
 
-Even with a custom STT, you still get:
+Even with a custom provider, you still get:
 - Session management (pairing, expiry, cleanup)
 - QR code / manual code pairing
 - Field registration and switching
 - SSE transcript relay to desktop
 - Desktop hook (`useVoicefield`)
 
-You only replace the phone page and the `generateSTTKey` callback.
+You only replace the STT provider — everything else stays the same.

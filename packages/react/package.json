@@ -24,16 +24,17 @@
     "build": "tsc",
     "dev": "tsc --watch",
     "clean": "rm -rf dist",
-    "lint": "eslint src/"
+    "lint": "eslint src/",
+    "test": "vitest run"
   },
   "dependencies": {
     "@voicefield/core": "workspace:^",
     "qrcode": "^1.5.0"
   },
   "peerDependencies": {
+    "@soniox/client": ">=2.0.0",
     "react": ">=18.0.0",
-    "react-dom": ">=18.0.0",
-    "@soniox/client": ">=2.0.0"
+    "react-dom": ">=18.0.0"
   },
   "peerDependenciesMeta": {
     "@soniox/client": {
@@ -45,6 +46,7 @@
     "@types/qrcode": "^1.5.0",
     "@types/react": "^19.0.0",
     "react": "^19.0.0",
-    "typescript": "^5.7.0"
+    "typescript": "^5.7.0",
+    "vitest": "^4.1.7"
   }
 }
