@@ -253,6 +253,6 @@ export function useVoicefield(config: VoicefieldConfig): UseVoicefieldReturn {
     register,
     unregister,
     serverUrl: externalServerUrl,
-    phoneUrl,
+    phoneUrl: phoneUrl || (detectedExternalUrl ? new URL(detectedExternalUrl).origin : (typeof window !== "undefined" ? window.location.origin : "")),
   }
 }
