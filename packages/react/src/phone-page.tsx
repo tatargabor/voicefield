@@ -335,7 +335,22 @@ export function Mic() {
         <style>{css}</style>
         <div style={s.card}>
           <div style={s.logoRow}>
-            <span style={s.logoIcon}>🎤</span>
+            <div style={s.logoIconCircle}>
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="white"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z" />
+                <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
+                <line x1="12" x2="12" y1="19" y2="22" />
+              </svg>
+            </div>
             <span style={s.logoText}>voicefield</span>
           </div>
           <p style={s.cardSub}>Enter the code shown on your desktop</p>
@@ -384,22 +399,51 @@ export function Mic() {
       <style>{css}</style>
       <div style={s.recordingPage}>
         <div style={s.logoRow}>
-          <span style={{ fontSize: 18 }}>🎤</span>
+          <div style={{ ...s.logoIconCircle, width: 32, height: 32 }}>
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="white"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z" />
+              <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
+              <line x1="12" x2="12" y1="19" y2="22" />
+            </svg>
+          </div>
           <span style={{ fontSize: 16, fontWeight: 600 }}>voicefield</span>
         </div>
 
         {fields.length > 1 && (
-          <select
-            value={activeFieldId ?? ""}
-            onChange={(e) => setActiveFieldId(e.target.value)}
-            style={s.fieldSelect}
-          >
+          <div style={s.pillBar} className="vf-pill-bar">
             {fields.map((f) => (
-              <option key={f.id} value={f.id}>
+              <button
+                key={f.id}
+                onClick={() => setActiveFieldId(f.id)}
+                style={f.id === activeFieldId ? s.pillActive : s.pill}
+              >
+                <svg
+                  width="14"
+                  height="14"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke={f.id === activeFieldId ? "white" : "#6b7280"}
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z" />
+                  <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
+                  <line x1="12" x2="12" y1="19" y2="22" />
+                </svg>
                 {f.label}
-              </option>
+              </button>
             ))}
-          </select>
+          </div>
         )}
         {fields.length === 1 && <div style={s.fieldBadge}>{fields[0].label}</div>}
 
@@ -500,7 +544,7 @@ const s = {
     display: "flex",
     flexDirection: "column" as const,
     alignItems: "center",
-    gap: 8,
+    gap: 12,
   } as const,
   logoRow: {
     display: "flex",
@@ -508,7 +552,15 @@ const s = {
     gap: 8,
     marginBottom: 8,
   } as const,
-  logoIcon: { fontSize: 24 } as const,
+  logoIconCircle: {
+    width: 36,
+    height: 36,
+    borderRadius: "50%",
+    background: "#2563eb",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+  } as const,
   logoText: { fontSize: 20, fontWeight: 700 } as const,
   cardSub: {
     fontSize: 15,
@@ -551,14 +603,49 @@ const s = {
     cursor: "pointer",
     transition: "background 0.15s",
   } as const,
-  fieldSelect: {
+  pillBar: {
+    display: "flex",
+    gap: 8,
+    overflowX: "auto" as const,
+    maxWidth: "100%",
+    padding: "4px 0",
     marginBottom: 12,
-    padding: "8px 16px",
-    borderRadius: 10,
+    scrollbarWidth: "none" as const,
+    WebkitOverflowScrolling: "touch" as const,
+  } as const,
+  pill: {
+    display: "flex",
+    alignItems: "center",
+    gap: 6,
+    padding: "10px 16px",
+    minHeight: 44,
+    borderRadius: 22,
     border: "1px solid #e5e7eb",
     fontSize: 14,
+    fontWeight: 500 as const,
     background: "#fff",
-    outline: "none",
+    color: "#374151",
+    cursor: "pointer",
+    whiteSpace: "nowrap" as const,
+    transition: "all 0.15s ease",
+    fontFamily: "inherit",
+  } as const,
+  pillActive: {
+    display: "flex",
+    alignItems: "center",
+    gap: 6,
+    padding: "10px 16px",
+    minHeight: 44,
+    borderRadius: 22,
+    border: "1px solid #2563eb",
+    fontSize: 14,
+    fontWeight: 500 as const,
+    background: "#2563eb",
+    color: "#fff",
+    cursor: "pointer",
+    whiteSpace: "nowrap" as const,
+    transition: "all 0.15s ease",
+    fontFamily: "inherit",
   } as const,
   fieldBadge: {
     fontSize: 13,
@@ -599,6 +686,9 @@ const s = {
 }
 
 const css = `
+  .vf-pill-bar::-webkit-scrollbar {
+    display: none;
+  }
   .mic-btn {
     width: 120px;
     height: 120px;
