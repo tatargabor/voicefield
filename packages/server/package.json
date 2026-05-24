@@ -1,6 +1,6 @@
 {
   "name": "@voicefield/server",
-  "version": "0.1.6",
+  "version": "0.1.9",
   "description": "Voicefield server-side relay for Next.js",
   "type": "module",
   "main": "./dist/index.js",

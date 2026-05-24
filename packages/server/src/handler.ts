@@ -373,10 +373,12 @@ function getLanAddresses(): string[] {
 
 async function handleNetworkInfo(request: NextRequest, cors: Record<string, string>) {
   const port = request.nextUrl.port || "3000"
+  const proto = request.headers.get("x-forwarded-proto") || request.nextUrl.protocol.replace(":", "")
+  const httpsPort = request.headers.get("x-forwarded-port") || port
   const lanIps = getLanAddresses()
   const basePath = request.nextUrl.pathname.replace(/\/network-info$/, "")
   return json({
-    lan: lanIps.map((ip) => `http://${ip}:${port}${basePath}`),
-    localhost: `http://localhost:${port}${basePath}`,
+    lan: lanIps.map((ip) => `${proto}://${ip}:${httpsPort}${basePath}`),
+    localhost: `${proto}://localhost:${httpsPort}${basePath}`,
   }, 200, cors)
 }
