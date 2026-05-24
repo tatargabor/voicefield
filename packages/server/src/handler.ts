@@ -18,7 +18,7 @@ import {
 } from "./session"
 
 export interface VoicefieldServerConfig {
-  generateSTTKey?: () => Promise<{ temporaryApiKey: string; expiresAt: number }>
+  generateSttKey?: () => Promise<{ temporaryApiKey: string; expiresAt: number }>
   cors?: {
     origins?: string[]
   }
@@ -117,10 +117,6 @@ async function handleCreateSession(
   config: VoicefieldServerConfig,
   cors: Record<string, string>,
 ) {
-  if (!config.generateSTTKey) {
-    return json({ error: "STT not configured", code: "NOT_CONFIGURED" }, 503, cors)
-  }
-
   let body: { fields?: Array<{ id: string; label: string }>; language?: string | string[] }
   try {
     body = await request.json()
@@ -149,10 +145,6 @@ async function handlePair(
   config: VoicefieldServerConfig,
   cors: Record<string, string>,
 ) {
-  if (!config.generateSTTKey) {
-    return json({ error: "STT not configured", code: "NOT_CONFIGURED" }, 503, cors)
-  }
-
   let body: { code?: string; secret?: string }
   try {
     body = await request.json()
@@ -183,21 +175,27 @@ async function handlePair(
 
   pushSSEEvent(session, { type: "paired" })
 
-  let sonioxTempKey = ""
-  let keyExpiresAt = 0
-  try {
-    const keyResult = await config.generateSTTKey()
-    sonioxTempKey = keyResult.temporaryApiKey
-    keyExpiresAt = keyResult.expiresAt
-  } catch {
-    return json({ error: "Failed to initialize speech service", code: "STT_ERROR" }, 500, cors)
+  let sttProvider = "web-speech"
+  let sttKey: string | null = null
+  let sttKeyExpiresAt: number | null = null
+
+  if (config.generateSttKey) {
+    try {
+      const keyResult = await config.generateSttKey()
+      sttProvider = "soniox"
+      sttKey = keyResult.temporaryApiKey
+      sttKeyExpiresAt = keyResult.expiresAt
+    } catch {
+      return json({ error: "Failed to initialize speech service", code: "STT_ERROR" }, 500, cors)
+    }
   }
 
   return json(
     {
       sessionToken,
-      sonioxTempKey,
-      sonioxKeyExpiresAt: keyExpiresAt,
+      sttProvider,
+      sttKey,
+      sttKeyExpiresAt,
       fields: session.fields,
       language: session.language,
       config: {
@@ -351,13 +349,13 @@ async function handleRefreshKey(
 
   touchSession(session)
 
-  if (!config.generateSTTKey) {
+  if (!config.generateSttKey) {
     return json({ error: "STT not configured", code: "NOT_CONFIGURED" }, 503, cors)
   }
 
   try {
-    const { temporaryApiKey, expiresAt } = await config.generateSTTKey()
-    return json({ sonioxTempKey: temporaryApiKey, expiresAt }, 200, cors)
+    const { temporaryApiKey, expiresAt } = await config.generateSttKey()
+    return json({ sttKey: temporaryApiKey, expiresAt }, 200, cors)
   } catch {
     return json({ error: "Failed to refresh speech service key", code: "STT_ERROR" }, 500, cors)
   }

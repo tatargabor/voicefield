@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from "react"
 import { isValidPairingCode, normalizePairingCode } from "@voicefield/core"
-import type { PairingResponse, SessionCommand } from "@voicefield/core"
+import type { PairingResponse, SessionCommand, STTProviderInstance } from "@voicefield/core"
+import { getProvider } from "./providers"
 
 type PageState = "code_entry" | "paired" | "recording" | "error"
 
@@ -10,8 +11,9 @@ export function Mic() {
   const [codeInput, setCodeInput] = useState("")
   const [error, setError] = useState<string | null>(null)
   const [sessionToken, setSessionToken] = useState<string | null>(null)
-  const [sonioxKey, setSonioxKey] = useState<string | null>(null)
-  const [sonioxKeyExpiresAt, setSonioxKeyExpiresAt] = useState(0)
+  const [sttProviderName, setSttProviderName] = useState<string>("web-speech")
+  const [sttKey, setSttKey] = useState<string | null>(null)
+  const [sttKeyExpiresAt, setSttKeyExpiresAt] = useState<number | null>(null)
   const [fields, setFields] = useState<Array<{ id: string; label: string }>>([])
   const [activeFieldId, setActiveFieldId] = useState<string | null>(null)
   const [language, setLanguage] = useState<string | string[]>("en")
@@ -24,7 +26,7 @@ export function Mic() {
   const recordingTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const silenceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const pollTimerRef = useRef<ReturnType<typeof setInterval> | null>(null)
-  const sttRef = useRef<{ stop: () => Promise<void> } | null>(null)
+  const sttRef = useRef<STTProviderInstance | null>(null)
   const partialTextRef = useRef("")
   const serverUrlRef = useRef<string | null>(null)
 
@@ -78,10 +80,11 @@ export function Mic() {
         throw new Error(errorMsg)
       }
 
-      const data: PairingResponse & { sonioxKeyExpiresAt?: number } = await res.json()
+      const data: PairingResponse = await res.json()
       setSessionToken(data.sessionToken)
-      setSonioxKey(data.sonioxTempKey)
-      setSonioxKeyExpiresAt(data.sonioxKeyExpiresAt ?? 0)
+      setSttProviderName(data.sttProvider)
+      setSttKey(data.sttKey)
+      setSttKeyExpiresAt(data.sttKeyExpiresAt)
       setFields(data.fields)
       setActiveFieldId(data.fields[0]?.id ?? null)
       setLanguage(data.language)
@@ -126,35 +129,12 @@ export function Mic() {
   }
 
   async function startRecording() {
-    if (!sonioxKey || pageState === "recording") return
+    if (pageState === "recording") return
     setError(null)
     setTranscript("")
     setPartialText("")
     setPageState("recording")
     sendRecordingState("start")
-
-    let micStream: MediaStream
-    try {
-      micStream = await navigator.mediaDevices.getUserMedia({ audio: true })
-    } catch (err) {
-      const message = err instanceof Error ? err.message : String(err)
-      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent)
-      if (
-        message.includes("NotAllowed") ||
-        message.includes("Permission") ||
-        message.includes("denied")
-      ) {
-        setError(
-          isIOS
-            ? "Microphone disabled — open iOS Settings → Browser → Microphone → turn ON"
-            : "Microphone blocked — tap the lock icon in URL bar → Site settings → Microphone → Allow",
-        )
-      } else {
-        setError(`Microphone error: ${message}`)
-      }
-      setPageState("paired")
-      return
-    }
 
     try {
       if ("wakeLock" in navigator) {
@@ -170,51 +150,30 @@ export function Mic() {
     resetSilenceTimer()
 
     try {
-      const { SonioxClient } = await import("@soniox/client")
-      const abortController = new AbortController()
-      const client = new SonioxClient({ api_key: sonioxKey })
-      const languageHints = Array.isArray(language) ? language : [language]
-
-      micStream.getTracks().forEach((t) => t.stop())
-
-      const recording = client.realtime.record({
-        model: "stt-rt-v4",
-        language_hints: languageHints,
-        enable_endpoint_detection: true,
-        signal: abortController.signal,
-      })
-
-      sttRef.current = {
-        stop: async () => {
-          try {
-            abortController.abort()
-          } catch {}
+      const factory = getProvider(sttProviderName)
+      const provider = factory({
+        sttKey,
+        language,
+        onPartial(text: string) {
+          resetSilenceTimer()
+          setPartialText(text)
+          partialTextRef.current = text
+          sendTranscript(text, false)
         },
-      }
-
-      recording.on("result", (result: { tokens?: Array<{ text: string; is_final?: boolean }> }) => {
-        const tokens = result.tokens ?? []
-        const text = tokens.map((t: { text: string }) => t.text).join("")
-        if (!text) return
-        resetSilenceTimer()
-
-        const isFinal = tokens.every((t: { is_final?: boolean }) => t.is_final)
-        if (isFinal) {
+        onFinal(text: string) {
+          resetSilenceTimer()
           setTranscript((prev) => prev + (prev ? " " : "") + text)
           setPartialText("")
           partialTextRef.current = ""
           sendTranscript(text, true)
-        } else {
-          setPartialText(text)
-          partialTextRef.current = text
-          sendTranscript(text, false)
-        }
+        },
+        onError(err: Error) {
+          setError(err.message)
+        },
       })
 
-      recording.on("error", (err: Error) => {
-        if (err.name === "AbortError" || err.message.includes("abort")) return
-        setError(err.message)
-      })
+      sttRef.current = provider
+      await provider.start()
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err)
       setError(`Recording error: ${message}`)
@@ -293,8 +252,8 @@ export function Mic() {
   }
 
   useEffect(() => {
-    if (!sonioxKeyExpiresAt || !sessionToken) return
-    const refreshIn = sonioxKeyExpiresAt - Date.now() - 5 * 60 * 1000
+    if (!sttKeyExpiresAt || !sttKey || !sessionToken) return
+    const refreshIn = sttKeyExpiresAt - Date.now() - 5 * 60 * 1000
     if (refreshIn <= 0) return
     const timer = setTimeout(async () => {
       try {
@@ -304,13 +263,13 @@ export function Mic() {
         })
         if (res.ok) {
           const data = await res.json()
-          setSonioxKey(data.sonioxTempKey)
-          setSonioxKeyExpiresAt(data.expiresAt)
+          setSttKey(data.sttKey)
+          setSttKeyExpiresAt(data.expiresAt)
         }
       } catch {}
     }, refreshIn)
     return () => clearTimeout(timer)
-  }, [sonioxKeyExpiresAt, sessionToken, authHeaders, getServerUrl])
+  }, [sttKeyExpiresAt, sttKey, sessionToken, authHeaders, getServerUrl])
 
   useEffect(() => {
     return () => {

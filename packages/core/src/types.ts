@@ -19,7 +19,9 @@ export interface TranscriptMessage {
 
 export interface PairingResponse {
   sessionToken: string
-  sonioxTempKey: string
+  sttProvider: string
+  sttKey: string | null
+  sttKeyExpiresAt: number | null
   fields: VoiceField[]
   language: string | string[]
   config: {
@@ -66,16 +68,17 @@ export interface SSEStatusEvent {
 
 export type SSEEvent = SSETranscriptEvent | SSEStatusEvent
 
-export interface STTProvider {
-  start(config: STTConfig): Promise<void>
+export interface STTProviderInstance {
+  start(): Promise<void>
   stop(): Promise<void>
-  onPartial(callback: (text: string) => void): void
-  onFinal(callback: (text: string) => void): void
-  onError(callback: (error: Error) => void): void
 }
 
-export interface STTConfig {
-  temporaryApiKey: string
+export interface STTProviderConfig {
+  sttKey: string | null
   language: string | string[]
-  model?: string
+  onPartial: (text: string) => void
+  onFinal: (text: string) => void
+  onError: (error: Error) => void
 }
+
+export type STTProviderFactory = (config: STTProviderConfig) => STTProviderInstance

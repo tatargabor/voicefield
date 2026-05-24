@@ -167,6 +167,10 @@ export function Landing() {
               it.
             </li>
             <li>
+              <strong>Bring your own STT.</strong> Ships with Soniox support, but the provider
+              interface is pluggable — Deepgram, Whisper, or any WebSocket STT.
+            </li>
+            <li>
               <strong>In-memory sessions.</strong> No database, no logs, 30-min TTL. Nothing
               persists.
             </li>
@@ -186,8 +190,11 @@ export function Landing() {
         <div className="container">
           <h2>Quick Start</h2>
           <div className="install-line">
-            <code>npm install @voicefield/react @voicefield/server @soniox/node</code>
+            <code>npm install @voicefield/react @voicefield/server</code>
           </div>
+          <p className="install-note">
+            Plus your STT provider SDK — e.g. <code>@soniox/node</code> for Soniox
+          </p>
           <div className="code-steps">
             <div className="code-step">
               <div className="code-header">
@@ -196,7 +203,7 @@ export function Landing() {
                 <span className="code-file">app/api/voice/[...voicefield]/route.ts</span>
               </div>
               <pre>{`import { createVoicefieldHandler } from '@voicefield/server'
-import { SonioxNodeClient } from '@soniox/node'
+import { SonioxNodeClient } from '@soniox/node' // or any STT SDK
 
 const soniox = new SonioxNodeClient({
   api_key: process.env.SONIOX_API_KEY!

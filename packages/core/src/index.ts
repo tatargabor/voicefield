@@ -10,8 +10,9 @@ export type {
   SSEEventType,
   SSETranscriptEvent,
   SSEStatusEvent,
-  STTProvider,
-  STTConfig,
+  STTProviderInstance,
+  STTProviderConfig,
+  STTProviderFactory,
 } from "./types"
 
 export {
