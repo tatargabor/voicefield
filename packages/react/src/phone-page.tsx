@@ -464,6 +464,9 @@ export function Mic() {
         <div style={s.statusRow}>
           <span className={isRec ? "status-dot recording" : "status-dot"} />
           <span style={{ fontSize: 13, color: "#888" }}>{isRec ? "Recording" : "Connected"}</span>
+          <span style={{ fontSize: 11, color: "#aaa", marginLeft: 8 }}>
+            {sttProviderName === "web-speech" ? "Web Speech" : sttProviderName}
+          </span>
           {!wakeLockActive && isRec && (
             <span style={{ fontSize: 12, color: "#d97706", marginLeft: 8 }}>Keep screen on</span>
           )}
