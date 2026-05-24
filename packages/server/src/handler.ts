@@ -23,7 +23,10 @@ export interface VoicefieldServerConfig {
   }
 }
 
-function corsHeaders(config: VoicefieldServerConfig, origin?: string | null): Record<string, string> {
+function corsHeaders(
+  config: VoicefieldServerConfig,
+  origin?: string | null,
+): Record<string, string> {
   const allowed = config.cors?.origins
   const allowOrigin =
     !allowed || allowed.includes("*")
@@ -55,7 +58,7 @@ function authenticateRequest(request: NextRequest) {
 export function createVoicefieldHandler(config: VoicefieldServerConfig = {}) {
   async function handleRequest(
     request: NextRequest,
-    context: { params: Promise<{ voicefield: string[] }> }
+    context: { params: Promise<{ voicefield: string[] }> },
   ) {
     const origin = request.headers.get("origin")
     const cors = corsHeaders(config, origin)
@@ -111,7 +114,7 @@ export function createVoicefieldHandler(config: VoicefieldServerConfig = {}) {
 async function handleCreateSession(
   request: NextRequest,
   config: VoicefieldServerConfig,
-  cors: Record<string, string>
+  cors: Record<string, string>,
 ) {
   if (!config.generateSTTKey) {
     return json({ error: "STT not configured", code: "NOT_CONFIGURED" }, 503, cors)
@@ -128,18 +131,22 @@ async function handleCreateSession(
   const language = body.language ?? "en"
   const session = createSession(fields, language)
 
-  return json({
-    sessionId: session.id,
-    pairingCode: session.pairingCode,
-    secret: session.secret,
-    expiresAt: session.expiresAt,
-  }, 200, cors)
+  return json(
+    {
+      sessionId: session.id,
+      pairingCode: session.pairingCode,
+      secret: session.secret,
+      expiresAt: session.expiresAt,
+    },
+    200,
+    cors,
+  )
 }
 
 async function handlePair(
   request: NextRequest,
   config: VoicefieldServerConfig,
-  cors: Record<string, string>
+  cors: Record<string, string>,
 ) {
   if (!config.generateSTTKey) {
     return json({ error: "STT not configured", code: "NOT_CONFIGURED" }, 503, cors)
@@ -185,17 +192,21 @@ async function handlePair(
     return json({ error: "Failed to initialize speech service", code: "STT_ERROR" }, 500, cors)
   }
 
-  return json({
-    sessionToken,
-    sonioxTempKey,
-    sonioxKeyExpiresAt: keyExpiresAt,
-    fields: session.fields,
-    language: session.language,
-    config: {
-      maxRecordingDuration: 120,
-      idleTimeout: 30,
+  return json(
+    {
+      sessionToken,
+      sonioxTempKey,
+      sonioxKeyExpiresAt: keyExpiresAt,
+      fields: session.fields,
+      language: session.language,
+      config: {
+        maxRecordingDuration: 120,
+        idleTimeout: 30,
+      },
     },
-  }, 200, cors)
+    200,
+    cors,
+  )
 }
 
 async function handleTranscript(request: NextRequest, cors: Record<string, string>) {
@@ -307,7 +318,11 @@ async function handleCommand(request: NextRequest, cors: Record<string, string>)
 
   const { sessionId, type, fieldId } = body
   if (!sessionId || !type || !fieldId) {
-    return json({ error: "Missing sessionId, type, or fieldId", code: "VALIDATION_ERROR" }, 400, cors)
+    return json(
+      { error: "Missing sessionId, type, or fieldId", code: "VALIDATION_ERROR" },
+      400,
+      cors,
+    )
   }
 
   const session = findSessionById(sessionId)
@@ -326,7 +341,7 @@ async function handleCommand(request: NextRequest, cors: Record<string, string>)
 async function handleRefreshKey(
   request: NextRequest,
   config: VoicefieldServerConfig,
-  cors: Record<string, string>
+  cors: Record<string, string>,
 ) {
   const session = authenticateRequest(request)
   if (!session) {
@@ -373,12 +388,17 @@ function getLanAddresses(): string[] {
 
 async function handleNetworkInfo(request: NextRequest, cors: Record<string, string>) {
   const port = request.nextUrl.port || "3000"
-  const proto = request.headers.get("x-forwarded-proto") || request.nextUrl.protocol.replace(":", "")
+  const proto =
+    request.headers.get("x-forwarded-proto") || request.nextUrl.protocol.replace(":", "")
   const httpsPort = request.headers.get("x-forwarded-port") || port
   const lanIps = getLanAddresses()
   const basePath = request.nextUrl.pathname.replace(/\/network-info$/, "")
-  return json({
-    lan: lanIps.map((ip) => `${proto}://${ip}:${httpsPort}${basePath}`),
-    localhost: `${proto}://localhost:${httpsPort}${basePath}`,
-  }, 200, cors)
+  return json(
+    {
+      lan: lanIps.map((ip) => `${proto}://${ip}:${httpsPort}${basePath}`),
+      localhost: `${proto}://localhost:${httpsPort}${basePath}`,
+    },
+    200,
+    cors,
+  )
 }

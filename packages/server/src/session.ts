@@ -67,10 +67,7 @@ function generateSessionToken(): string {
   return randomBytes(48).toString("base64url")
 }
 
-export function createSession(
-  fields: VoiceField[],
-  language: string | string[]
-): Session {
+export function createSession(fields: VoiceField[], language: string | string[]): Session {
   ensureCleanupRunning()
   const now = Date.now()
   const pairingCode = generatePairingCode()
@@ -153,7 +150,9 @@ export function endSession(session: Session): void {
   codeIndex.delete(session.pairingCode)
   pushSSEEvent(session, { type: "session_ended" })
   for (const controller of session.sseClients) {
-    try { controller.close() } catch {}
+    try {
+      controller.close()
+    } catch {}
   }
   session.sseClients.clear()
 }
@@ -170,14 +169,14 @@ export function drainCommands(session: Session): SessionCommand[] {
 
 export function registerSSEClient(
   session: Session,
-  controller: ReadableStreamDefaultController
+  controller: ReadableStreamDefaultController,
 ): void {
   session.sseClients.add(controller)
 }
 
 export function unregisterSSEClient(
   session: Session,
-  controller: ReadableStreamDefaultController
+  controller: ReadableStreamDefaultController,
 ): void {
   session.sseClients.delete(controller)
 }
@@ -199,10 +198,7 @@ export function pushSSEEvent(session: Session, event: SSEEvent): void {
   }
 }
 
-export function getBufferedEventsSince(
-  session: Session,
-  lastEventId: number
-): BufferedEvent[] {
+export function getBufferedEventsSince(session: Session, lastEventId: number): BufferedEvent[] {
   return session.eventBuffer.filter((e) => e.id > lastEventId)
 }
 
@@ -225,7 +221,9 @@ function cleanupExpired(): number {
     if (isExpired(session)) {
       codeIndex.delete(session.pairingCode)
       for (const controller of session.sseClients) {
-        try { controller.close() } catch {}
+        try {
+          controller.close()
+        } catch {}
       }
       sessions.delete(id)
       cleaned++

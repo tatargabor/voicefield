@@ -72,7 +72,9 @@ export function Mic() {
       if (!res.ok) {
         const text = await res.text()
         let errorMsg = "Pairing failed"
-        try { errorMsg = JSON.parse(text).error || errorMsg } catch {}
+        try {
+          errorMsg = JSON.parse(text).error || errorMsg
+        } catch {}
         throw new Error(errorMsg)
       }
 
@@ -137,10 +139,15 @@ export function Mic() {
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err)
       const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent)
-      if (message.includes("NotAllowed") || message.includes("Permission") || message.includes("denied")) {
-        setError(isIOS
-          ? "Microphone disabled — open iOS Settings → Browser → Microphone → turn ON"
-          : "Microphone blocked — tap the lock icon in URL bar → Site settings → Microphone → Allow"
+      if (
+        message.includes("NotAllowed") ||
+        message.includes("Permission") ||
+        message.includes("denied")
+      ) {
+        setError(
+          isIOS
+            ? "Microphone disabled — open iOS Settings → Browser → Microphone → turn ON"
+            : "Microphone blocked — tap the lock icon in URL bar → Site settings → Microphone → Allow",
         )
       } else {
         setError(`Microphone error: ${message}`)
@@ -179,7 +186,9 @@ export function Mic() {
 
       sttRef.current = {
         stop: async () => {
-          try { abortController.abort() } catch {}
+          try {
+            abortController.abort()
+          } catch {}
         },
       }
 
@@ -222,8 +231,14 @@ export function Mic() {
   }
 
   async function stopRecording(reason?: string) {
-    if (recordingTimerRef.current) { clearTimeout(recordingTimerRef.current); recordingTimerRef.current = null }
-    if (silenceTimerRef.current) { clearTimeout(silenceTimerRef.current); silenceTimerRef.current = null }
+    if (recordingTimerRef.current) {
+      clearTimeout(recordingTimerRef.current)
+      recordingTimerRef.current = null
+    }
+    if (silenceTimerRef.current) {
+      clearTimeout(silenceTimerRef.current)
+      silenceTimerRef.current = null
+    }
 
     if (sttRef.current) {
       await sttRef.current.stop()
@@ -335,17 +350,24 @@ export function Mic() {
               setCodeInput(raw.length > 3 ? `${raw.slice(0, 3)} ${raw.slice(3)}` : raw)
               if (raw.length === 6) setTimeout(() => pair(raw), 0)
             }}
-            onKeyDown={(e) => { if (e.key === "Enter") handleCodeSubmit() }}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") handleCodeSubmit()
+            }}
             placeholder="000 000"
             style={s.codeInput}
             autoFocus
           />
-          <button onClick={handleCodeSubmit} style={s.primaryBtn}>Connect</button>
+          <button onClick={handleCodeSubmit} style={s.primaryBtn}>
+            Connect
+          </button>
           {!serverUrl && (
             <input
               type="url"
               placeholder="Server URL (from QR code)"
-              onChange={(e) => { setServerUrl(e.target.value); serverUrlRef.current = e.target.value }}
+              onChange={(e) => {
+                setServerUrl(e.target.value)
+                serverUrlRef.current = e.target.value
+              }}
               style={s.urlInput}
             />
           )}
@@ -372,26 +394,39 @@ export function Mic() {
             onChange={(e) => setActiveFieldId(e.target.value)}
             style={s.fieldSelect}
           >
-            {fields.map((f) => <option key={f.id} value={f.id}>{f.label}</option>)}
+            {fields.map((f) => (
+              <option key={f.id} value={f.id}>
+                {f.label}
+              </option>
+            ))}
           </select>
         )}
-        {fields.length === 1 && (
-          <div style={s.fieldBadge}>{fields[0].label}</div>
-        )}
+        {fields.length === 1 && <div style={s.fieldBadge}>{fields[0].label}</div>}
 
         <button
-          onClick={() => isRec ? stopRecording() : startRecording()}
+          onClick={() => (isRec ? stopRecording() : startRecording())}
           className={isRec ? "mic-btn recording" : "mic-btn"}
           aria-label={isRec ? "Stop recording" : "Start recording"}
         >
           <span className="mic-btn-inner">
             {isRec ? (
-              <svg width="32" height="32" viewBox="0 0 24 24" fill="white"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="white">
+                <rect x="6" y="6" width="12" height="12" rx="2" />
+              </svg>
             ) : (
-              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/>
-                <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
-                <line x1="12" x2="12" y1="19" y2="22"/>
+              <svg
+                width="32"
+                height="32"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="white"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z" />
+                <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
+                <line x1="12" x2="12" y1="19" y2="22" />
               </svg>
             )}
           </span>
@@ -403,7 +438,19 @@ export function Mic() {
 
         <div style={s.transcriptBox}>
           {transcript && <p style={{ fontSize: 15, margin: 0, lineHeight: 1.5 }}>{transcript}</p>}
-          {partialText && <p style={{ fontSize: 15, margin: 0, fontStyle: "italic", color: "#888", lineHeight: 1.5 }}>{partialText}</p>}
+          {partialText && (
+            <p
+              style={{
+                fontSize: 15,
+                margin: 0,
+                fontStyle: "italic",
+                color: "#888",
+                lineHeight: 1.5,
+              }}
+            >
+              {partialText}
+            </p>
+          )}
           {!transcript && !partialText && (
             <p style={{ fontSize: 14, color: "#bbb", textAlign: "center", margin: 0 }}>
               {isRec ? "Listening..." : "Transcript appears here"}

@@ -5,8 +5,8 @@ const apiKey = process.env.SONIOX_API_KEY
 if (!apiKey) {
   console.warn(
     "⚠️  SONIOX_API_KEY not set. Voice sessions will fail to pair.\n" +
-    "   Get a free key at https://soniox.com and add to .env.local:\n" +
-    "   SONIOX_API_KEY=your-key-here"
+      "   Get a free key at https://soniox.com and add to .env.local:\n" +
+      "   SONIOX_API_KEY=your-key-here",
   )
 }
 

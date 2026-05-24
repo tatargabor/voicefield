@@ -15,9 +15,12 @@ export function buildQRUrl(
   serverUrl: string,
   code: string,
   secret: string,
-  origin?: string
+  origin?: string,
 ): string {
-  const base = phoneUrl || origin || (typeof window !== "undefined" ? window.location.origin : "http://localhost")
+  const base =
+    phoneUrl ||
+    origin ||
+    (typeof window !== "undefined" ? window.location.origin : "http://localhost")
   const url = new URL("/mic", base)
   const serverBase = serverUrl.startsWith("/") && origin ? origin + serverUrl : serverUrl
   url.searchParams.set("server", serverBase)
@@ -27,7 +30,7 @@ export function buildQRUrl(
 }
 
 export function parseQRUrl(
-  url: string
+  url: string,
 ): { server: string; code: string; secret: string | null } | null {
   try {
     const parsed = new URL(url)

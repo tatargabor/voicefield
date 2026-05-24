@@ -12,15 +12,19 @@ export default function App() {
   return (
     <main style={{ maxWidth: 640, margin: "0 auto", padding: "32px 24px" }}>
       <div style={{ marginBottom: 24 }}>
-        <h1 style={{ fontSize: 24, fontWeight: 700, marginBottom: 4 }}>
-          Voicefield Demo
-        </h1>
-        <p style={{ fontSize: 14, color: "#888" }}>
-          Click the mic, scan with your phone, speak.
-        </p>
+        <h1 style={{ fontSize: 24, fontWeight: 700, marginBottom: 4 }}>Voicefield Demo</h1>
+        <p style={{ fontSize: 14, color: "#888" }}>Click the mic, scan with your phone, speak.</p>
       </div>
 
-      <div style={{ display: "flex", gap: 4, marginBottom: 24, borderBottom: "1px solid #e5e7eb", paddingBottom: 1 }}>
+      <div
+        style={{
+          display: "flex",
+          gap: 4,
+          marginBottom: 24,
+          borderBottom: "1px solid #e5e7eb",
+          paddingBottom: 1,
+        }}
+      >
         {(["chat", "form"] as Tab[]).map((t) => (
           <button
             key={t}

@@ -79,26 +79,46 @@ export function QRPopup({
           textAlign: "center",
         }}
       >
-        <h3 style={{ fontSize: "18px", fontWeight: 600, marginBottom: "4px" }}>
-          Pair your phone
-        </h3>
+        <h3 style={{ fontSize: "18px", fontWeight: 600, marginBottom: "4px" }}>Pair your phone</h3>
         <p style={{ fontSize: "14px", color: "#666", marginBottom: "16px" }}>
           Scan the QR code or enter the code manually
         </p>
 
         {qrDataUrl && (
           <div style={{ display: "flex", justifyContent: "center", marginBottom: "16px" }}>
-            <img src={qrDataUrl} alt="QR code for pairing" width={200} height={200} style={{ borderRadius: "8px" }} />
+            <img
+              src={qrDataUrl}
+              alt="QR code for pairing"
+              width={200}
+              height={200}
+              style={{ borderRadius: "8px" }}
+            />
           </div>
         )}
 
         <p style={{ fontSize: "13px", color: "#888", marginBottom: "4px" }}>
           Or go to <span style={{ fontFamily: "monospace", fontWeight: 500 }}>{micHost}/mic</span>
         </p>
-        <p style={{ fontSize: "28px", fontFamily: "monospace", fontWeight: 700, letterSpacing: "0.1em", marginBottom: "8px" }}>
+        <p
+          style={{
+            fontSize: "28px",
+            fontFamily: "monospace",
+            fontWeight: 700,
+            letterSpacing: "0.1em",
+            marginBottom: "8px",
+          }}
+        >
           {formatPairingCode(pairingCode)}
         </p>
-        <p style={{ fontSize: "11px", color: "#aaa", wordBreak: "break-all", fontFamily: "monospace", lineHeight: 1.4 }}>
+        <p
+          style={{
+            fontSize: "11px",
+            color: "#aaa",
+            wordBreak: "break-all",
+            fontFamily: "monospace",
+            lineHeight: 1.4,
+          }}
+        >
           Server: {serverUrl}
         </p>
 

@@ -31,7 +31,7 @@ export interface UseVoicefieldReturn {
     id: string,
     label: string,
     element?: HTMLInputElement | HTMLTextAreaElement | null,
-    setterFn?: (value: string, isFinal: boolean) => void
+    setterFn?: (value: string, isFinal: boolean) => void,
   ) => void
   unregister: (id: string) => void
   serverUrl: string
@@ -40,7 +40,10 @@ export interface UseVoicefieldReturn {
 
 export function useVoicefield(config: VoicefieldConfig): UseVoicefieldReturn {
   const serverUrl = config.serverUrl.replace(/\/$/, "")
-  const phoneUrl = (config.phoneUrl === undefined ? PHONE_URL_HOSTED : config.phoneUrl).replace(/\/$/, "")
+  const phoneUrl = (config.phoneUrl === undefined ? PHONE_URL_HOSTED : config.phoneUrl).replace(
+    /\/$/,
+    "",
+  )
 
   const [sessionId, setSessionId] = useState<string | null>(null)
   const [pairingCode, setPairingCode] = useState<string | null>(null)
@@ -54,13 +57,13 @@ export function useVoicefield(config: VoicefieldConfig): UseVoicefieldReturn {
   const eventSourceRef = useRef<EventSource | null>(null)
   const rotationTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-  const originIsPublic = typeof window !== "undefined"
-    && !isPrivateOrigin(window.location.hostname)
+  const originIsPublic = typeof window !== "undefined" && !isPrivateOrigin(window.location.hostname)
 
-  const externalServerUrl = config.externalServerUrl
-    || (originIsPublic ? window.location.origin + serverUrl : null)
-    || detectedExternalUrl
-    || (typeof window !== "undefined" ? window.location.origin + serverUrl : serverUrl)
+  const externalServerUrl =
+    config.externalServerUrl ||
+    (originIsPublic ? window.location.origin + serverUrl : null) ||
+    detectedExternalUrl ||
+    (typeof window !== "undefined" ? window.location.origin + serverUrl : serverUrl)
 
   useEffect(() => {
     if (config.externalServerUrl || originIsPublic) return
@@ -80,7 +83,7 @@ export function useVoicefield(config: VoicefieldConfig): UseVoicefieldReturn {
     if (detectedExternalUrl) return detectedExternalUrl
     try {
       const r = await fetch(`${serverUrl}/network-info`)
-      const data = await r.json() as { lan?: string[] }
+      const data = (await r.json()) as { lan?: string[] }
       if (data.lan && data.lan.length > 0) {
         setDetectedExternalUrl(data.lan[0])
         return data.lan[0]
@@ -105,72 +108,75 @@ export function useVoicefield(config: VoicefieldConfig): UseVoicefieldReturn {
     return data.sessionId
   }, [serverUrl, config.language])
 
-  const subscribeSSE = useCallback((sid: string) => {
-    if (eventSourceRef.current) {
-      eventSourceRef.current.close()
-    }
+  const subscribeSSE = useCallback(
+    (sid: string) => {
+      if (eventSourceRef.current) {
+        eventSourceRef.current.close()
+      }
 
-    const es = new EventSource(`${serverUrl}/transcript?sessionId=${sid}`)
-    eventSourceRef.current = es
+      const es = new EventSource(`${serverUrl}/transcript?sessionId=${sid}`)
+      eventSourceRef.current = es
 
-    es.onmessage = (event) => {
-      try {
-        const data = JSON.parse(event.data) as Record<string, unknown>
-        const type = data.type as string
+      es.onmessage = (event) => {
+        try {
+          const data = JSON.parse(event.data) as Record<string, unknown>
+          const type = data.type as string
 
-        switch (type) {
-          case "connected":
-            break
-          case "paired":
-            setSessionState("paired")
-            setIsQRVisible(false)
-            if (rotationTimerRef.current) {
-              clearTimeout(rotationTimerRef.current)
-              rotationTimerRef.current = null
+          switch (type) {
+            case "connected":
+              break
+            case "paired":
+              setSessionState("paired")
+              setIsQRVisible(false)
+              if (rotationTimerRef.current) {
+                clearTimeout(rotationTimerRef.current)
+                rotationTimerRef.current = null
+              }
+              break
+            case "transcript": {
+              const { text, isFinal, fieldId } = data as unknown as {
+                text: string
+                isFinal: boolean
+                fieldId: string
+              }
+              if (isFinal) {
+                registryRef.current.finalizePartial(fieldId)
+                registryRef.current.injectText(fieldId, text, true)
+              } else {
+                registryRef.current.injectText(fieldId, text, false)
+              }
+              break
             }
-            break
-          case "transcript": {
-            const { text, isFinal, fieldId } = data as unknown as {
-              text: string
-              isFinal: boolean
-              fieldId: string
-            }
-            if (isFinal) {
-              registryRef.current.finalizePartial(fieldId)
-              registryRef.current.injectText(fieldId, text, true)
-            } else {
-              registryRef.current.injectText(fieldId, text, false)
-            }
-            break
+            case "recording_start":
+              setIsRecording(true)
+              setSessionState("active")
+              break
+            case "recording_stop":
+              setIsRecording(false)
+              break
+            case "session_ended":
+              setSessionState("expired")
+              es.close()
+              break
+            case "field_switched":
+              if (data.fieldId && typeof data.fieldId === "string") {
+                registryRef.current.setActiveField(data.fieldId)
+              }
+              break
           }
-          case "recording_start":
-            setIsRecording(true)
-            setSessionState("active")
-            break
-          case "recording_stop":
-            setIsRecording(false)
-            break
-          case "session_ended":
-            setSessionState("expired")
-            es.close()
-            break
-          case "field_switched":
-            if (data.fieldId && typeof data.fieldId === "string") {
-              registryRef.current.setActiveField(data.fieldId)
-            }
-            break
+        } catch {
+          // ignore parse errors
         }
-      } catch {
-        // ignore parse errors
       }
-    }
 
-    es.onerror = () => {
-      if (es.readyState === EventSource.CLOSED) {
-        setSessionState("disconnected")
+      es.onerror = () => {
+        if (es.readyState === EventSource.CLOSED) {
+          setSessionState("disconnected")
+        }
       }
-    }
-  }, [serverUrl])
+    },
+    [serverUrl],
+  )
 
   const showQR = useCallback(async () => {
     await resolveExternalUrl()
@@ -181,12 +187,15 @@ export function useVoicefield(config: VoicefieldConfig): UseVoicefieldReturn {
     setIsQRVisible(true)
 
     if (rotationTimerRef.current) clearTimeout(rotationTimerRef.current)
-    rotationTimerRef.current = setTimeout(async () => {
-      if (sessionState === "created") {
-        const sid = await createNewSession()
-        subscribeSSE(sid)
-      }
-    }, 5 * 60 * 1000)
+    rotationTimerRef.current = setTimeout(
+      async () => {
+        if (sessionState === "created") {
+          const sid = await createNewSession()
+          subscribeSSE(sid)
+        }
+      },
+      5 * 60 * 1000,
+    )
   }, [sessionId, sessionState, createNewSession, subscribeSSE, resolveExternalUrl])
 
   const hideQR = useCallback(() => {
@@ -222,7 +231,7 @@ export function useVoicefield(config: VoicefieldConfig): UseVoicefieldReturn {
         body: JSON.stringify({ sessionId, type: "switch_field", fieldId }),
       })
     },
-    [sessionId, serverUrl]
+    [sessionId, serverUrl],
   )
 
   const register = useCallback(
@@ -230,11 +239,11 @@ export function useVoicefield(config: VoicefieldConfig): UseVoicefieldReturn {
       id: string,
       label: string,
       element?: HTMLInputElement | HTMLTextAreaElement | null,
-      setterFn?: (value: string, isFinal: boolean) => void
+      setterFn?: (value: string, isFinal: boolean) => void,
     ) => {
       registryRef.current.register(id, label, element, setterFn)
     },
-    []
+    [],
   )
 
   const unregister = useCallback((id: string) => {
@@ -265,6 +274,12 @@ export function useVoicefield(config: VoicefieldConfig): UseVoicefieldReturn {
     register,
     unregister,
     serverUrl: externalServerUrl,
-    phoneUrl: phoneUrl || (detectedExternalUrl ? new URL(detectedExternalUrl).origin : (typeof window !== "undefined" ? window.location.origin : "")),
+    phoneUrl:
+      phoneUrl ||
+      (detectedExternalUrl
+        ? new URL(detectedExternalUrl).origin
+        : typeof window !== "undefined"
+          ? window.location.origin
+          : ""),
   }
 }

@@ -13,5 +13,5 @@ createRoot(document.getElementById("root")!).render(
         <Route path="/mic" element={<Mic />} />
       </Routes>
     </BrowserRouter>
-  </StrictMode>
+  </StrictMode>,
 )

@@ -16,7 +16,7 @@ export class FieldRegistry {
     id: string,
     label: string,
     element?: HTMLInputElement | HTMLTextAreaElement | null,
-    setterFn?: (value: string, isFinal: boolean) => void
+    setterFn?: (value: string, isFinal: boolean) => void,
   ): void {
     this.fields.set(id, {
       field: { id, label },

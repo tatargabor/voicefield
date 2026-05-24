@@ -24,7 +24,7 @@ export function ChatDemo() {
 
   const onTranscript = useCallback((value: string, isFinal: boolean) => {
     if (isFinal) {
-      setDraft(prev => prev + (prev ? " " : "") + value)
+      setDraft((prev) => prev + (prev ? " " : "") + value)
     }
   }, [])
 
@@ -36,7 +36,7 @@ export function ChatDemo() {
   const send = useCallback(() => {
     const text = draftRef.current.trim()
     if (!text) return
-    setMessages(prev => [...prev, { id: nextId.current++, text, timestamp: new Date() }])
+    setMessages((prev) => [...prev, { id: nextId.current++, text, timestamp: new Date() }])
     setDraft("")
     draftRef.current = ""
     inputRef.current?.focus()
@@ -76,7 +76,7 @@ export function ChatDemo() {
             Speak into your phone or type below
           </p>
         )}
-        {messages.map(m => (
+        {messages.map((m) => (
           <div
             key={m.id}
             style={{
@@ -125,20 +125,33 @@ export function ChatDemo() {
             justifyContent: "center",
             transition: "background 0.2s",
           }}
-          title={vf.isPaired ? (vf.isRecording ? "Recording..." : "Phone connected") : "Pair your phone"}
+          title={
+            vf.isPaired ? (vf.isRecording ? "Recording..." : "Phone connected") : "Pair your phone"
+          }
         >
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/>
-            <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
-            <line x1="12" x2="12" y1="19" y2="22"/>
+          <svg
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="white"
+            strokeWidth="2.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z" />
+            <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
+            <line x1="12" x2="12" y1="19" y2="22" />
           </svg>
         </button>
 
         <input
           ref={inputRef}
           value={draft}
-          onChange={e => setDraft(e.target.value)}
-          onKeyDown={e => { if (e.key === "Enter") send() }}
+          onChange={(e) => setDraft(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") send()
+          }}
           placeholder={vf.isRecording ? "Listening..." : "Type or speak..."}
           style={{
             flex: 1,
@@ -171,15 +184,35 @@ export function ChatDemo() {
 
       {/* Status */}
       {vf.isPaired && (
-        <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 8, fontSize: 12, color: "#888" }}>
-          <span style={{
-            width: 6, height: 6, borderRadius: "50%",
-            background: vf.isRecording ? "#ef4444" : "#22c55e",
-          }} />
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 6,
+            marginTop: 8,
+            fontSize: 12,
+            color: "#888",
+          }}
+        >
+          <span
+            style={{
+              width: 6,
+              height: 6,
+              borderRadius: "50%",
+              background: vf.isRecording ? "#ef4444" : "#22c55e",
+            }}
+          />
           {vf.isRecording ? "Recording — speak into your phone" : "Phone connected"}
           <button
             onClick={() => vf.endSession()}
-            style={{ marginLeft: "auto", fontSize: 12, color: "#aaa", background: "none", border: "none", cursor: "pointer" }}
+            style={{
+              marginLeft: "auto",
+              fontSize: 12,
+              color: "#aaa",
+              background: "none",
+              border: "none",
+              cursor: "pointer",
+            }}
           >
             Disconnect
           </button>

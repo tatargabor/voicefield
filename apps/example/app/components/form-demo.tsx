@@ -20,13 +20,13 @@ export function FormDemo() {
   })
 
   const nameSetter = useCallback((value: string, isFinal: boolean) => {
-    if (isFinal) setName(prev => prev + (prev ? " " : "") + value)
+    if (isFinal) setName((prev) => prev + (prev ? " " : "") + value)
   }, [])
   const subjectSetter = useCallback((value: string, isFinal: boolean) => {
-    if (isFinal) setSubject(prev => prev + (prev ? " " : "") + value)
+    if (isFinal) setSubject((prev) => prev + (prev ? " " : "") + value)
   }, [])
   const messageSetter = useCallback((value: string, isFinal: boolean) => {
-    if (isFinal) setMessage(prev => prev + (prev ? " " : "") + value)
+    if (isFinal) setMessage((prev) => prev + (prev ? " " : "") + value)
   }, [])
 
   vf.register("name", "Name", null, nameSetter)
@@ -34,9 +34,30 @@ export function FormDemo() {
   vf.register("message", "Message", null, messageSetter)
 
   const fields = [
-    { id: "name", label: "Name", ref: nameRef, value: name, setValue: setName, type: "input" as const },
-    { id: "subject", label: "Subject", ref: subjectRef, value: subject, setValue: setSubject, type: "input" as const },
-    { id: "message", label: "Message", ref: messageRef, value: message, setValue: setMessage, type: "textarea" as const },
+    {
+      id: "name",
+      label: "Name",
+      ref: nameRef,
+      value: name,
+      setValue: setName,
+      type: "input" as const,
+    },
+    {
+      id: "subject",
+      label: "Subject",
+      ref: subjectRef,
+      value: subject,
+      setValue: setSubject,
+      type: "input" as const,
+    },
+    {
+      id: "message",
+      label: "Message",
+      ref: messageRef,
+      value: message,
+      setValue: setMessage,
+      type: "textarea" as const,
+    },
   ]
 
   return (
@@ -58,10 +79,19 @@ export function FormDemo() {
             transition: "background 0.2s",
           }}
         >
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/>
-            <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
-            <line x1="12" x2="12" y1="19" y2="22"/>
+          <svg
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="white"
+            strokeWidth="2.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z" />
+            <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
+            <line x1="12" x2="12" y1="19" y2="22" />
           </svg>
         </button>
         <span style={{ fontSize: 13, color: "#888" }}>
@@ -74,7 +104,7 @@ export function FormDemo() {
       </div>
 
       <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-        {fields.map(f => (
+        {fields.map((f) => (
           <div key={f.id}>
             <label
               htmlFor={f.id}
@@ -98,9 +128,12 @@ export function FormDemo() {
                 id={f.id}
                 ref={f.ref as React.RefObject<HTMLTextAreaElement | null>}
                 value={f.value}
-                onChange={e => f.setValue(e.target.value)}
+                onChange={(e) => f.setValue(e.target.value)}
                 rows={5}
-                onFocus={() => { setActiveField(f.id); vf.switchField(f.id) }}
+                onFocus={() => {
+                  setActiveField(f.id)
+                  vf.switchField(f.id)
+                }}
                 placeholder={`Speak or type ${f.label.toLowerCase()}...`}
                 style={{
                   width: "100%",
@@ -119,8 +152,11 @@ export function FormDemo() {
                 id={f.id}
                 ref={f.ref as React.RefObject<HTMLInputElement | null>}
                 value={f.value}
-                onChange={e => f.setValue(e.target.value)}
-                onFocus={() => { setActiveField(f.id); vf.switchField(f.id) }}
+                onChange={(e) => f.setValue(e.target.value)}
+                onFocus={() => {
+                  setActiveField(f.id)
+                  vf.switchField(f.id)
+                }}
                 placeholder={`Speak or type ${f.label.toLowerCase()}...`}
                 style={{
                   width: "100%",
