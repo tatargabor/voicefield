@@ -64,24 +64,6 @@ importers:
         specifier: ^5.7.0
         version: 5.9.3
 
-  apps/smoke-test:
-    dependencies:
-      '@voicefield/react':
-        specifier: ^0.2.0
-        version: 0.2.0(@soniox/client@2.1.0)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
-      '@voicefield/server':
-        specifier: ^0.2.0
-        version: 0.2.0(@soniox/node@1.1.2)(next@15.5.18(@playwright/test@1.60.0)(react-dom@19.2.6(react@19.2.6))(react@19.2.6))
-      next:
-        specifier: ^15.0.0
-        version: 15.5.18(@playwright/test@1.60.0)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
-      react:
-        specifier: ^19.0.0
-        version: 19.2.6
-      react-dom:
-        specifier: ^19.0.0
-        version: 19.2.6(react@19.2.6)
-
   apps/web:
     dependencies:
       '@soniox/client':
@@ -994,28 +976,6 @@ packages:
 
   '@vitest/utils@4.1.7':
     resolution: {integrity: sha512-T532WBu791cBxJlCl6SO+J14l81DQx6uQHm1bQbmCDY7nqlEIgkza/UFnSBNaUtSf41unldDFjdOBYEQC4b5Hw==}
-
-  '@voicefield/core@0.2.0':
-    resolution: {integrity: sha512-ZWD7D239VnakeARKrmns/sSMZPvJctM7UnejwXz8EeATf2LeqFL1Hm6nCdovcLqA5wzTJf3uEFQOb0+N6hxK4A==}
-
-  '@voicefield/react@0.2.0':
-    resolution: {integrity: sha512-leZuBJu7u7Tgn+z7c/BovNlIqDh6Lw8voTQDZW6K1sQsbkSWm6/XXWDeOILEXUa+dvopJUL66DGRXg57wv8nug==}
-    peerDependencies:
-      '@soniox/client': '>=2.0.0'
-      react: '>=18.0.0'
-      react-dom: '>=18.0.0'
-    peerDependenciesMeta:
-      '@soniox/client':
-        optional: true
-
-  '@voicefield/server@0.2.0':
-    resolution: {integrity: sha512-KOHf2d0vbj/GEKxWGiuj0WYIff+rg278LhsC6UP/2vmIrbuWUceh5GiR1E2CRfaJl5WKOBzDmOzdPNp58gM4cg==}
-    peerDependencies:
-      '@soniox/node': '>=1.0.0'
-      next: '>=14.0.0'
-    peerDependenciesMeta:
-      '@soniox/node':
-        optional: true
 
   acorn-jsx@5.3.2:
     resolution: {integrity: sha512-rq9s+JNhf0IChjtDXxllJ7g41oZk5SlXtp0LHwyA5cejwn7vKmKp4pPri6YEePv2PU65sAsegbXtIinmDFDXgQ==}
@@ -2427,24 +2387,6 @@ snapshots:
       '@vitest/pretty-format': 4.1.7
       convert-source-map: 2.0.0
       tinyrainbow: 3.1.0
-
-  '@voicefield/core@0.2.0': {}
-
-  '@voicefield/react@0.2.0(@soniox/client@2.1.0)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)':
-    dependencies:
-      '@voicefield/core': 0.2.0
-      qrcode: 1.5.4
-      react: 19.2.6
-      react-dom: 19.2.6(react@19.2.6)
-    optionalDependencies:
-      '@soniox/client': 2.1.0
-
-  '@voicefield/server@0.2.0(@soniox/node@1.1.2)(next@15.5.18(@playwright/test@1.60.0)(react-dom@19.2.6(react@19.2.6))(react@19.2.6))':
-    dependencies:
-      '@voicefield/core': 0.2.0
-      next: 15.5.18(@playwright/test@1.60.0)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
-    optionalDependencies:
-      '@soniox/node': 1.1.2
 
   acorn-jsx@5.3.2(acorn@8.16.0):
     dependencies:

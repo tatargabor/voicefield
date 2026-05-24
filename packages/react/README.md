@@ -5,10 +5,12 @@ React hook and components for adding voice input to any web field. Scan a QR cod
 ## Install
 
 ```bash
-npm install @voicefield/react @voicefield/server @soniox/node
+npm install @voicefield/react @voicefield/server
 ```
 
-Peer dependencies: `react >= 18`, `react-dom >= 18`, `@soniox/client >= 2.0` (optional, only needed if self-hosting the phone page).
+No API key needed — works immediately with the browser's built-in speech recognition.
+
+Peer dependencies: `react >= 18`, `react-dom >= 18`. Optional: `@soniox/client >= 2.0` for Soniox STT provider.
 
 ## Quick Start
 

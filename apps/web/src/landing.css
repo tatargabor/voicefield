@@ -564,6 +564,45 @@
   font-family: "SF Mono", "Fira Code", "Fira Mono", monospace;
 }
 
+.upgrade-note {
+  margin-top: 32px;
+  padding: 20px 24px;
+  background: var(--gray-50);
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius);
+  font-size: 14px;
+  color: var(--gray-600);
+  line-height: 1.6;
+}
+
+.upgrade-note strong {
+  color: var(--gray-900);
+}
+
+.upgrade-note a {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.upgrade-note code {
+  background: var(--gray-100);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 13px;
+}
+
+.upgrade-note pre {
+  margin: 12px 0 0;
+  padding: 16px 20px;
+  background: #1e1e2e;
+  color: #cdd6f4;
+  overflow-x: auto;
+  font-size: 12px;
+  line-height: 1.6;
+  font-family: "SF Mono", "Fira Code", "Fira Mono", monospace;
+  border-radius: 8px;
+}
+
 /* ── Packages ── */
 
 .packages {

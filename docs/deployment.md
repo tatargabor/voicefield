@@ -107,7 +107,7 @@ Add your ngrok domain to CORS:
 
 ```typescript
 const { GET, POST, OPTIONS } = createVoicefieldHandler({
-  generateSTTKey: async () => { /* ... */ },
+  generateSttKey: async () => { /* ... */ },
   cors: {
     origins: ["https://voicefield.dev", "https://abc123.ngrok-free.app"],
   },
@@ -181,7 +181,7 @@ SONIOX_API_KEY=your-key-here
 
 ```typescript
 const { GET, POST, OPTIONS } = createVoicefieldHandler({
-  generateSTTKey: async () => { /* ... */ },
+  generateSttKey: async () => { /* ... */ },
   cors: {
     origins: ["https://voicefield.dev"],
   },

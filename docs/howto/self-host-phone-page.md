@@ -43,7 +43,7 @@ Your server must allow the phone page origin:
 
 ```typescript
 const { GET, POST, OPTIONS } = createVoicefieldHandler({
-  generateSTTKey: async () => { /* ... */ },
+  generateSttKey: async () => { /* ... */ },
   cors: {
     origins: ["https://voice.yourcompany.com"],
   },

@@ -244,7 +244,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  sonioxTempKey:
+                  sttKey:
                     type: string
                   expiresAt:
                     type: integer
@@ -355,10 +355,17 @@ components:
       properties:
         sessionToken:
           type: string
-        sonioxTempKey:
+        sttProvider:
           type: string
-        sonioxKeyExpiresAt:
+          description: STT provider name ("soniox" or "web-speech")
+        sttKey:
+          type: string
+          nullable: true
+          description: Temporary STT API key (null for web-speech)
+        sttKeyExpiresAt:
           type: integer
+          nullable: true
+          description: Key expiry timestamp (null for web-speech)
         fields:
           type: array
           items:

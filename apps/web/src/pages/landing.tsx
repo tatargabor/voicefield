@@ -69,87 +69,48 @@ export function Landing() {
         </div>
       </section>
 
-      {/* Demo — phone + desktop mockup */}
+      {/* Demo — real screenshots cycling through 3 states */}
       <section className="demo">
         <div className="container">
-          {/* TODO: Replace with <video src="/demo.mp4" autoPlay loop muted playsInline className="demo-video" /> */}
           <div className="demo-scene">
-            <div className="phone">
-              <div className="phone-notch" />
-              <div className="phone-content">
-                <div className="phone-waveform" aria-hidden="true">
-                  <span />
-                  <span />
-                  <span />
-                  <span />
-                  <span />
-                  <span />
-                  <span />
-                  <span />
-                  <span />
+            <div className="demo-side">
+              <span className="demo-label">Phone</span>
+              <div className="phone">
+                <div className="phone-notch" />
+                <div className="phone-screen">
+                  <img src="/demo/phone-1.webp" alt="Phone: enter pairing code" className="demo-img demo-img-1" />
+                  <img src="/demo/phone-2.webp" alt="Phone: recording voice" className="demo-img demo-img-2" />
+                  <img src="/demo/phone-3.webp" alt="Phone: multi-field mode" className="demo-img demo-img-3" />
                 </div>
-                <div className="phone-mic-btn">
-                  <svg
-                    width="28"
-                    height="28"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="white"
-                    strokeWidth="2.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z" />
-                    <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
-                    <line x1="12" x2="12" y1="19" y2="22" />
-                  </svg>
-                </div>
-                <span className="phone-label">Listening...</span>
               </div>
             </div>
 
             <div className="connector">
-              <svg width="80" height="2" viewBox="0 0 80 2">
-                <line
-                  x1="0"
-                  y1="1"
-                  x2="80"
-                  y2="1"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeDasharray="6 4"
-                />
-              </svg>
+              <div className="connector-line" />
               <span>text only</span>
-              <svg width="80" height="2" viewBox="0 0 80 2">
-                <line
-                  x1="0"
-                  y1="1"
-                  x2="80"
-                  y2="1"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeDasharray="6 4"
-                />
-              </svg>
+              <div className="connector-line" />
             </div>
 
-            <div className="desktop">
-              <div className="desktop-dots">
-                <span />
-                <span />
-                <span />
-              </div>
-              <div className="desktop-body">
-                <label>Message</label>
-                <div className="desktop-field">
-                  <span className="typing-text">
-                    Hello, this text is being dictated from my phone in real time
-                  </span>
-                  <span className="cursor" />
+            <div className="demo-side">
+              <span className="demo-label">Desktop</span>
+              <div className="desktop">
+                <div className="desktop-dots">
+                  <span />
+                  <span />
+                  <span />
+                </div>
+                <div className="desktop-screen">
+                  <img src="/demo/desktop-1.webp" alt="Desktop: QR pairing dialog" className="demo-img demo-img-1" />
+                  <img src="/demo/desktop-2.webp" alt="Desktop: voice message received" className="demo-img demo-img-2" />
+                  <img src="/demo/desktop-3.webp" alt="Desktop: form fields filled" className="demo-img demo-img-3" />
                 </div>
               </div>
             </div>
+          </div>
+          <div className="demo-steps">
+            <span className="demo-step demo-step-1">1. Scan QR code</span>
+            <span className="demo-step demo-step-2">2. Speak into phone</span>
+            <span className="demo-step demo-step-3">3. Text fills the form</span>
           </div>
         </div>
       </section>
@@ -167,8 +128,8 @@ export function Landing() {
               it.
             </li>
             <li>
-              <strong>Bring your own STT.</strong> Ships with Soniox support, but the provider
-              interface is pluggable — Deepgram, Whisper, or any WebSocket STT.
+              <strong>Works out of the box.</strong> Uses the browser's built-in speech recognition
+              — no API key needed. Upgrade to Soniox or bring your own STT for higher accuracy.
             </li>
             <li>
               <strong>In-memory sessions.</strong> No database, no logs, 30-min TTL. Nothing
@@ -193,7 +154,7 @@ export function Landing() {
             <code>npm install @voicefield/react @voicefield/server</code>
           </div>
           <p className="install-note">
-            Plus your STT provider SDK — e.g. <code>@soniox/node</code> for Soniox
+            No API key needed — works immediately with the browser's built-in speech recognition.
           </p>
           <div className="code-steps">
             <div className="code-step">
@@ -203,23 +164,8 @@ export function Landing() {
                 <span className="code-file">app/api/voice/[...voicefield]/route.ts</span>
               </div>
               <pre>{`import { createVoicefieldHandler } from '@voicefield/server'
-import { SonioxNodeClient } from '@soniox/node' // or any STT SDK
-
-const soniox = new SonioxNodeClient({
-  api_key: process.env.SONIOX_API_KEY!
-})
 
 const { GET, POST, OPTIONS } = createVoicefieldHandler({
-  generateSTTKey: async () => {
-    const result = await soniox.auth.createTemporaryKey({
-      usage_type: 'transcribe_websocket',
-      expires_in_seconds: 1800,
-    })
-    return {
-      temporaryApiKey: result.api_key,
-      expiresAt: Date.now() + 1800_000,
-    }
-  },
   cors: { origins: ['https://voicefield.dev'] },
 })
 
@@ -270,6 +216,29 @@ export function VoiceInput() {
   )
 }`}</pre>
             </div>
+          </div>
+          <div className="upgrade-note">
+            <strong>Want higher accuracy?</strong> Add{" "}
+            <a href="https://soniox.com">Soniox</a> — just configure{" "}
+            <code>generateSttKey</code> in your API route:
+            <pre>{`import { SonioxNodeClient } from '@soniox/node'
+
+const soniox = new SonioxNodeClient({
+  api_key: process.env.SONIOX_API_KEY!
+})
+
+createVoicefieldHandler({
+  generateSttKey: async () => {
+    const result = await soniox.auth.createTemporaryKey({
+      usage_type: 'transcribe_websocket',
+      expires_in_seconds: 1800,
+    })
+    return {
+      temporaryApiKey: result.api_key,
+      expiresAt: Date.now() + 1800_000,
+    }
+  },
+})`}</pre>
           </div>
         </div>
       </section>

@@ -5,12 +5,13 @@ Step-by-step guide to integrate Voicefield into an existing Next.js App Router p
 ## Prerequisites
 
 - Next.js 14+ with App Router
-- A Soniox API key (free at [soniox.com](https://soniox.com))
+
+No API key needed — works immediately with the browser's built-in speech recognition.
 
 ## 1. Install packages
 
 ```bash
-npm install @voicefield/react @voicefield/server @soniox/node
+npm install @voicefield/react @voicefield/server
 ```
 
 ## 2. Create the API route
@@ -20,23 +21,15 @@ Create a catch-all route that handles all Voicefield endpoints:
 ```typescript
 // app/api/voice/[...voicefield]/route.ts
 import { createVoicefieldHandler } from "@voicefield/server"
-import { SonioxNodeClient } from "@soniox/node"
-
-const soniox = new SonioxNodeClient({ api_key: process.env.SONIOX_API_KEY! })
 
 const { GET, POST, OPTIONS } = createVoicefieldHandler({
-  generateSTTKey: async () => {
-    const result = await soniox.auth.createTemporaryKey({
-      usage_type: "transcribe_websocket",
-      expires_in_seconds: 1800,
-    })
-    return { temporaryApiKey: result.api_key, expiresAt: Date.now() + 1800_000 }
-  },
   cors: { origins: ["https://voicefield.dev"] },
 })
 
 export { GET, POST, OPTIONS }
 ```
+
+> **Want higher accuracy?** Add Soniox: `npm install @soniox/node`, then configure `generateSttKey`. See [Custom STT Provider](./custom-stt-provider.md).
 
 ## 3. Mount the phone page (for local dev)
 
@@ -85,13 +78,7 @@ export function VoiceSearch() {
 }
 ```
 
-## 5. Set your API key
-
-```bash
-echo "SONIOX_API_KEY=your-key-here" >> .env.local
-```
-
-## 6. Test it
+## 5. Test it
 
 ```bash
 npm run dev

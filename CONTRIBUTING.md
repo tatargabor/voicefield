@@ -12,10 +12,10 @@ pnpm build
 ### Running the example app
 
 ```bash
-cp apps/example/.env.local.example apps/example/.env.local
-# Add your SONIOX_API_KEY (free at https://soniox.com)
 cd apps/example && pnpm dev
 ```
+
+Works immediately with Web Speech API. For Soniox, copy `.env.local.example` and add your key.
 
 ### Testing with a real phone
 

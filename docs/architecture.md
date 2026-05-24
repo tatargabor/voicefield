@@ -83,10 +83,10 @@ Server validates:
 
 Server generates:
   - Session token (384-bit random, base64url)
-  - Soniox temporary API key (via generateSTTKey callback)
+  - Soniox temporary API key (via generateSttKey callback)
 
 Server ──response──> Phone
-         { sessionToken, sonioxTempKey, fields, language, config }
+         { sessionToken, sttKey, fields, language, config }
 
 Server ──SSE push──> Desktop
          { type: "paired" }

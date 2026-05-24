@@ -5,32 +5,19 @@ Server-side relay handler for Voicefield. Manages sessions, pairing, and transcr
 ## Install
 
 ```bash
-npm install @voicefield/server @soniox/node
+npm install @voicefield/server
 ```
 
-Peer dependencies: `next >= 14`, `@soniox/node >= 1.0` (optional if providing your own `generateSTTKey`).
+No API key needed — works immediately with the browser's built-in Web Speech API.
 
 ## Quick Start (Next.js App Router)
 
 ```typescript
 // app/api/voice/[...voicefield]/route.ts
 import { createVoicefieldHandler } from "@voicefield/server"
-import { SonioxNodeClient } from "@soniox/node"
-
-const soniox = new SonioxNodeClient({ api_key: process.env.SONIOX_API_KEY! })
 
 const { GET, POST, OPTIONS } = createVoicefieldHandler({
-  generateSTTKey: async () => {
-    const result = await soniox.auth.createTemporaryKey({
-      usage_type: "transcribe_websocket",
-      expires_in_seconds: 1800,
-      single_use: false,
-    })
-    return { temporaryApiKey: result.api_key, expiresAt: Date.now() + 1800_000 }
-  },
-  cors: {
-    origins: ["https://voicefield.dev"],
-  },
+  cors: { origins: ["https://voicefield.dev"] },
 })
 
 export { GET, POST, OPTIONS }
@@ -38,11 +25,39 @@ export { GET, POST, OPTIONS }
 
 That's it. The catch-all route handles all Voicefield endpoints.
 
+### Upgrading to Soniox (optional)
+
+For higher accuracy, add a cloud STT provider:
+
+```bash
+npm install @soniox/node
+```
+
+```typescript
+import { createVoicefieldHandler } from "@voicefield/server"
+import { SonioxNodeClient } from "@soniox/node"
+
+const soniox = new SonioxNodeClient({ api_key: process.env.SONIOX_API_KEY! })
+
+const { GET, POST, OPTIONS } = createVoicefieldHandler({
+  generateSttKey: async () => {
+    const result = await soniox.auth.createTemporaryKey({
+      usage_type: "transcribe_websocket",
+      expires_in_seconds: 1800,
+    })
+    return { temporaryApiKey: result.api_key, expiresAt: Date.now() + 1800_000 }
+  },
+  cors: { origins: ["https://voicefield.dev"] },
+})
+
+export { GET, POST, OPTIONS }
+```
+
 ## Configuration
 
 ```typescript
 interface VoicefieldServerConfig {
-  generateSTTKey?: () => Promise<{
+  generateSttKey?: () => Promise<{
     temporaryApiKey: string
     expiresAt: number   // unix ms timestamp
   }>
@@ -54,7 +69,7 @@ interface VoicefieldServerConfig {
 
 | Option | Description |
 |--------|-------------|
-| `generateSTTKey` | Async function that returns a temporary Soniox API key. Called on pairing and key refresh. |
+| `generateSttKey` | Optional. Async function that returns a temporary STT API key. If omitted, the phone uses the browser's Web Speech API. |
 | `cors.origins` | List of origins allowed to call the API. Include `https://voicefield.dev` if using hosted phone page. Use `["*"]` for development. |
 
 ## API Endpoints
@@ -95,20 +110,6 @@ Created ──[phone pairs]──> Paired ──[phone starts recording]──> 
 - Sliding TTL: 30 minutes of inactivity → expired
 - Hard max: 24 hours regardless of activity
 
-## Custom STT Providers
-
-You can use any STT service — just return a temporary API key (or equivalent auth token) from `generateSTTKey`. The phone page uses `@soniox/client` by default, but you could build a custom phone page that uses any provider.
-
-```typescript
-createVoicefieldHandler({
-  generateSTTKey: async () => {
-    // Your custom STT provider
-    const token = await mySTTService.createTempToken({ duration: 1800 })
-    return { temporaryApiKey: token, expiresAt: Date.now() + 1800_000 }
-  },
-})
-```
-
 ## CORS Configuration
 
 For **local development** (phone on same WiFi):
@@ -125,13 +126,6 @@ For **self-hosted phone page**:
 ```typescript
 cors: { origins: ["https://voice.yourcompany.com"] }
 ```
-
-## Environment Variables
-
-| Variable | Required | Description |
-|----------|----------|-------------|
-| `SONIOX_API_KEY` | Yes | Your Soniox API key for generating temp keys |
-| `NEXT_PUBLIC_VOICEFIELD_EXTERNAL_URL` | No | Override the external URL (for tunnels) |
 
 ## License
 

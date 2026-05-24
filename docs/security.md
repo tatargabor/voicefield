@@ -46,7 +46,7 @@ The 6-digit pairing code is designed for manual entry (shown on screen, typed on
 | Pairing code | ~20-bit | `crypto.randomBytes(3)` mod 1M | Human-readable pairing |
 | Secret | 256-bit | `crypto.randomBytes(32).hex` | QR pairing validation |
 | Session token | 384-bit | `crypto.randomBytes(48).base64url` | Phone auth (Bearer) |
-| Soniox temp key | Provider-defined | Via `generateSTTKey()` callback | Phone→Soniox auth |
+| Soniox temp key | Provider-defined | Via `generateSttKey()` callback | Phone→Soniox auth |
 
 ## Session Lifecycle Security
 
