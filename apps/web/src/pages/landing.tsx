@@ -413,6 +413,17 @@ vf.register("prompt", "Prompt", ref)
         </div>
       </section>
 
+      {/* Agent prompt */}
+      <div className="container">
+        <div className="agent-prompt">
+          <span className="agent-prompt-label">Try it now — paste this into your AI agent:</span>
+          <div className="agent-prompt-box">
+            <code>download and test: https://voicefield.dev/</code>
+            <CopyButton text="download and test: https://voicefield.dev/" />
+          </div>
+        </div>
+      </div>
+
       {/* Setup */}
       <section className="start" id="setup">
         <div className="container">
