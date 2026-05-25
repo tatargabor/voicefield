@@ -6,10 +6,10 @@
       name="viewport"
       content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
     />
-    <title>Voicefield — Voice-enable any web field</title>
+    <title>VoiceField — Voice input primitives for React</title>
     <meta
       name="description"
-      content="Turn your phone into a microphone for any web application. Scan QR, speak, text appears. Open source."
+      content="A drop-in React hook that adds realtime voice input to any textarea, input, or prompt box. Your user's phone becomes the mic."
     />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <style>
@@ -22,8 +22,6 @@
       }
       body {
         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-        color: #111;
-        background: #fff;
       }
       a {
         color: inherit;
@@ -31,6 +29,9 @@
     </style>
   </head>
   <body>
+    <script>
+      (function(){var t=localStorage.getItem("vf-theme");if(t==="dark"||(t!=="light"&&matchMedia("(prefers-color-scheme:dark)").matches))document.documentElement.classList.add("dark")})()
+    </script>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
