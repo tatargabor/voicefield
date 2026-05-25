@@ -10,6 +10,8 @@ npm install @voicefield/server
 
 No API key needed — works immediately with the browser's built-in Web Speech API.
 
+**Try the demo app** — clone [github.com/tatargabor/voicefield](https://github.com/tatargabor/voicefield) and run `pnpm install && pnpm build && cd apps/example && pnpm dev`. For phone testing: `ngrok http 3000` and open the HTTPS URL on desktop.
+
 ## Quick Start (Next.js App Router)
 
 ```typescript

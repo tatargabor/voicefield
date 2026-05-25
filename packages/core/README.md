@@ -8,6 +8,8 @@ Shared types and utilities for the Voicefield ecosystem. Zero runtime dependenci
 npm install @voicefield/core
 ```
 
+**Full project & demo** — [github.com/tatargabor/voicefield](https://github.com/tatargabor/voicefield)
+
 ## What's in the box
 
 ### Types
