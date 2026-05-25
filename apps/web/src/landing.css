@@ -563,6 +563,38 @@ html.dark {
   color: var(--code-fg);
 }
 
+/* ── Agent Prompt ── */
+
+.agent-prompt {
+  max-width: 540px;
+  margin: 0 auto 60px;
+  text-align: center;
+}
+
+.agent-prompt-label {
+  display: block;
+  font-size: 13px;
+  color: var(--muted);
+  margin-bottom: 10px;
+}
+
+.agent-prompt-box {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  justify-content: center;
+  padding: 12px 16px;
+  background: var(--bg-2);
+  border: 1px dashed var(--accent-muted);
+  border-radius: var(--radius-sm);
+}
+
+.agent-prompt-box code {
+  font-size: 13px;
+  font-family: var(--mono);
+  color: var(--fg);
+}
+
 /* ── Setup (Quick Start) ── */
 
 .start {
@@ -710,6 +742,53 @@ html.dark {
   font-size: 12px;
   color: var(--muted-2);
   margin-top: 24px;
+}
+
+/* ── Try with agent ── */
+
+.try-agent {
+  padding: 60px 0;
+  border-top: 1px solid var(--border);
+}
+
+.platforms {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.platforms-label {
+  display: block;
+  font-size: 12px;
+  color: var(--muted-2);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: 12px;
+}
+
+.platforms-icons {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.platform-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--muted);
+  padding: 6px 12px;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  background: var(--surface);
+}
+
+.platform-sep {
+  width: 1px;
+  height: 20px;
+  background: var(--border-2);
 }
 
 /* ── Footer ── */
