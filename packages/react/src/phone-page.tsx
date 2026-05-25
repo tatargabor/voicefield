@@ -191,6 +191,7 @@ export function Mic() {
   }
 
   async function stopRecording(reason?: string) {
+    if (pageState !== "recording") return
     if (recordingTimerRef.current) {
       clearTimeout(recordingTimerRef.current)
       recordingTimerRef.current = null
