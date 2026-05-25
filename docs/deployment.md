@@ -4,9 +4,9 @@
 
 | Mode | Phone page | Server | HTTPS | Setup | Best for |
 |------|-----------|--------|-------|-------|----------|
-| Local (LAN) | Your server `/mic` | localhost | Not needed | Zero config | Development |
-| ngrok | voicefield.dev | ngrok tunnel | Automatic | 1 command + env var | Dev with real phone |
-| mkcert | Your server `/mic` | localhost HTTPS | Manual cert | mkcert + phone CA | Offline dev |
+| Local (LAN) | Your server `/mic` | localhost | Not needed | Zero config | Desktop mic only (phones need HTTPS) |
+| ngrok | voicefield.dev | ngrok tunnel | Automatic | 1 command | Dev with real phone |
+| mkcert | Your server `/mic` | localhost HTTPS | Manual cert | mkcert + phone CA | Offline dev with phone |
 | Hosted | voicefield.dev | Your production domain | Let's Encrypt | DNS + deploy | Production |
 | Self-hosted | Your domain | Your domain | Let's Encrypt | Deploy both | Enterprise |
 
@@ -58,30 +58,21 @@ The QR code will point to `http://192.168.x.x:3000/mic` — your phone connects 
 
 ngrok gives you a public HTTPS URL that tunnels to your local server. The phone gets HTTPS (needed for microphone access) without certificate setup.
 
-### Setup
-
-1. Install ngrok: https://ngrok.com/download
-
-2. Start your dev server:
+### Quick start
 
 ```bash
-# Next.js 16+: use 127.0.0.1 (not 0.0.0.0)
-npm run dev -- --hostname 127.0.0.1
-```
+# Terminal 1: start your dev server
+npm run dev
 
-3. Start ngrok in another terminal:
-
-```bash
+# Terminal 2: expose via ngrok
 ngrok http 3000
 ```
 
-4. Set the environment variable:
+Open the ngrok HTTPS URL (e.g. `https://abc123.ngrok-free.app`) **on your desktop**. The QR code will automatically point the phone to the HTTPS tunnel. That's it.
 
-```env
-NEXT_PUBLIC_VOICEFIELD_EXTERNAL_URL=https://abc123.ngrok-free.app/api/voice
-```
+### Custom server URL (optional)
 
-5. Or pass it directly:
+If auto-detection doesn't work, pass the ngrok URL explicitly:
 
 ```tsx
 const vf = useVoicefield({

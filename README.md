@@ -106,6 +106,20 @@ cd apps/example && pnpm dev
 
 Works immediately with Web Speech API. For Soniox, copy `.env.local.example` and add your key.
 
+### Testing with a phone (ngrok)
+
+Phones need HTTPS for microphone access. Use [ngrok](https://ngrok.com) to expose your local dev server:
+
+```bash
+# Terminal 1: start the example app
+cd apps/example && pnpm dev   # runs on http://localhost:3000
+
+# Terminal 2: expose via ngrok
+ngrok http 3000
+```
+
+Open the ngrok HTTPS URL on your desktop, scan the QR code with your phone, and speak.
+
 ## Upgrading to a Cloud STT Provider
 
 Web Speech API works great for most use cases. For higher accuracy or more language support, add a cloud provider like [Soniox](https://soniox.com):
@@ -147,13 +161,13 @@ The provider is selected automatically — if `generateSttKey` is configured, th
 
 ## Deployment Modes
 
-| Mode | Phone page | Server | HTTPS | Setup effort |
-|------|-----------|--------|-------|-------------|
-| **Local (LAN)** | Your `/mic` page | localhost | Not needed | Zero |
-| **ngrok** | voicefield.dev | ngrok tunnel | Automatic | 1 command |
-| **mkcert** | Your `/mic` page | localhost + cert | Manual | Phone CA install |
-| **Production** | voicefield.dev | Your domain | Let's Encrypt | Standard deploy |
-| **Self-hosted** | Your domain | Your domain | Let's Encrypt | Deploy both |
+| Mode | Phone page | Server | HTTPS | Setup effort | Notes |
+|------|-----------|--------|-------|-------------|-------|
+| **Local (LAN)** | Your `/mic` page | localhost | Not needed | Zero | Desktop mic only — phones need HTTPS |
+| **ngrok** | voicefield.dev | ngrok tunnel | Automatic | 1 command | Phone mic works, best for dev |
+| **mkcert** | Your `/mic` page | localhost + cert | Manual | Phone CA install | Phone mic works |
+| **Production** | voicefield.dev | Your domain | Let's Encrypt | Standard deploy | Phone mic works |
+| **Self-hosted** | Your domain | Your domain | Let's Encrypt | Deploy both | Phone mic works |
 
 ### Local development (no tunnel needed)
 
@@ -169,12 +183,13 @@ const vf = useVoicefield({
 
 The QR code points to `http://192.168.x.x:PORT/mic` — phone connects over WiFi.
 
-**Note**: Real phones need HTTPS for microphone access. Use ngrok for dev:
+**Important**: This mode only works for desktop-to-desktop testing (mic in the same browser). Phones require HTTPS for microphone access — use ngrok or the default production mode instead:
 
 ```bash
 ngrok http 3000
-# Set: NEXT_PUBLIC_VOICEFIELD_EXTERNAL_URL=https://abc123.ngrok-free.app/api/voice
 ```
+
+Then open the ngrok HTTPS URL on your desktop. The QR code will automatically point the phone to the HTTPS tunnel.
 
 ### Production (hosted phone page)
 
