@@ -131,7 +131,6 @@ export function Mic() {
   async function startRecording() {
     if (pageState === "recording") return
     setError(null)
-    setTranscript("")
     setPartialText("")
     setPageState("recording")
     sendRecordingState("start")
@@ -207,6 +206,8 @@ export function Mic() {
     const pendingPartial = partialTextRef.current
     if (pendingPartial) {
       partialTextRef.current = ""
+      setTranscript((prev) => prev + (prev ? " " : "") + pendingPartial)
+      setPartialText("")
       await sendTranscript(pendingPartial, true)
     }
 

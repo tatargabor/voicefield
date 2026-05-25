@@ -63,6 +63,11 @@ export class FieldRegistry {
     if (!el) return
 
     if (isFinal) {
+      const base = el.dataset.voicefieldBase
+      if (base !== undefined) {
+        el.value = base
+        delete el.dataset.voicefieldBase
+      }
       const current = el.value
       const separator = current && !current.endsWith(" ") ? " " : ""
       el.value = current + separator + text
