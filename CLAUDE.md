@@ -15,7 +15,10 @@ cd packages/react && pnpm build
 cd packages/server && pnpm build
 
 # Example app (Next.js)
-cd apps/example && pnpm dev    # needs .env.local with SONIOX_API_KEY
+cd apps/example && pnpm dev    # works without API key (Web Speech API fallback)
+
+# Phone testing requires HTTPS — use ngrok:
+ngrok http 3000                # then open the ngrok HTTPS URL on desktop
 
 # Web/landing (Vite SPA, deployed to Cloudflare Pages)
 cd apps/web && pnpm dev
@@ -48,6 +51,25 @@ cd apps/example && npx playwright test
 
 Lockstep versioning — all packages share the same version. Script handles order (core → react → server).
 Packages publish to npm under `@voicefield` org.
+
+## Running the Demo
+
+To test with a real phone (mic requires HTTPS):
+
+```bash
+pnpm install && pnpm build
+cd apps/example && pnpm dev          # Terminal 1: starts on http://localhost:3000
+ngrok http 3000                      # Terminal 2: creates HTTPS tunnel
+# Open the ngrok URL (https://xxx.ngrok-free.app) on DESKTOP browser
+# Scan the QR code with your phone — speak — text appears in the field
+```
+
+Desktop-only testing (no phone, no ngrok needed):
+
+```bash
+cd apps/example && pnpm dev
+# Open http://localhost:3000 — the mic button uses the desktop's own microphone
+```
 
 ## Coding Conventions
 
@@ -93,7 +115,7 @@ Voicefield turns a phone into a wireless microphone for any web form. The data f
 - **Audio never leaves the phone** — STT runs client-side, relay only sees text
 - **Sessions are in-memory** — no database, 30-min sliding TTL, 24h hard max
 - **Cryptographic pairing** — 256-bit secret in QR, 384-bit session token, single-use 6-digit code
-- **Local dev without HTTPS** — auto-detects LAN IP via `/network-info` endpoint; QR points to `http://LAN_IP:PORT/mic`
+- **Local dev without HTTPS** — desktop-only mic works via LAN IP auto-detection; phone mic requires HTTPS (use `ngrok http 3000`)
 - **Production uses voicefield.dev** — phone page loads from static hosted SPA, API calls go to customer's server
 
 ### Server API routes (all under `[...voicefield]` catch-all)
