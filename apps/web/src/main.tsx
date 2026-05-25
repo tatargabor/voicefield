@@ -5,6 +5,8 @@ import { Landing } from "./pages/landing"
 import { Mic } from "./pages/mic"
 import "./landing.css"
 
+document.getElementById("static-fallback")?.remove()
+
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <BrowserRouter>
