@@ -949,8 +949,8 @@ html.dark {
   }
 
   .desktop {
-    width: 100%;
-    max-width: 300px;
+    width: 85vw;
+    max-width: 360px;
   }
 
   .flow-steps {
