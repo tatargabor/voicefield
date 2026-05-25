@@ -218,7 +218,7 @@ export function Landing() {
       <section className="hero">
         <div className="container">
           <h1>
-            Voice input for any text field.
+            Phone-powered voice input for any desktop text field.
             <br />
             <span className="hero-dim">A React hook. That&apos;s it.</span>
           </h1>
