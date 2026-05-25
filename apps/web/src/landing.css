@@ -398,7 +398,7 @@ html.dark {
 
 .desktop-screen {
   position: relative;
-  aspect-ratio: 480 / 432;
+  aspect-ratio: 480 / 404;
   overflow: hidden;
 }
 
