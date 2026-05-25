@@ -67,6 +67,10 @@ for pkg in "${PACKAGES[@]}"; do
   info "Bumped $pkg/package.json → $NEW_VERSION"
 done
 
+# Update version constant in react package
+sed -i "s/export const VERSION = \"[^\"]*\"/export const VERSION = \"$NEW_VERSION\"/" packages/react/src/version.ts
+info "Bumped packages/react/src/version.ts → $NEW_VERSION"
+
 # Update workspace dependency versions (react/server depend on core)
 for pkg in "packages/react" "packages/server"; do
   sed -i "s/\"@voicefield\/core\": \"workspace:\^[^\"]*\"/\"@voicefield\/core\": \"workspace:^$NEW_VERSION\"/" "$pkg/package.json" 2>/dev/null || true

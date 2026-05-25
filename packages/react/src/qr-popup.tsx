@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { formatPairingCode, buildQRUrl } from "@voicefield/core"
+import { VERSION } from "./version"
 
 interface QRPopupProps {
   pairingCode: string | null
@@ -137,6 +138,7 @@ export function QRPopup({
         >
           Cancel
         </button>
+        <span style={{ fontSize: "11px", color: "#ccc" }}>v{VERSION}</span>
       </div>
     </div>
   )

@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback } from "react"
 import { isValidPairingCode, normalizePairingCode } from "@voicefield/core"
 import type { PairingResponse, SessionCommand, STTProviderInstance } from "@voicefield/core"
 import { getProvider } from "./providers"
+import { VERSION } from "./version"
 
 type PageState = "code_entry" | "paired" | "recording" | "error"
 
@@ -474,6 +475,8 @@ export function Mic() {
         </div>
 
         {error && <div style={s.errorBox}>{error}</div>}
+
+        <span style={{ fontSize: 11, color: "#ccc", marginTop: 12 }}>v{VERSION}</span>
       </div>
     </div>
   )
