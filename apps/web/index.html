@@ -11,14 +11,23 @@
       name="description"
       content="A drop-in React hook that adds realtime voice input to any textarea, input, or prompt box. Your user's phone becomes the mic. npm install @voicefield/react @voicefield/server"
     />
-    <meta name="keywords" content="voicefield, react, voice input, speech-to-text, STT, hook, useVoicefield, QR code, phone mic" />
+    <meta
+      name="keywords"
+      content="voicefield, react, voice input, speech-to-text, STT, hook, useVoicefield, QR code, phone mic"
+    />
     <meta property="og:title" content="VoiceField — Voice input primitives for React" />
-    <meta property="og:description" content="One React hook. Your user's phone becomes the mic. Speech recognition runs on the phone, only text reaches your server. npm install @voicefield/react" />
+    <meta
+      property="og:description"
+      content="One React hook. Your user's phone becomes the mic. Speech recognition runs on the phone, only text reaches your server. npm install @voicefield/react"
+    />
     <meta property="og:url" content="https://voicefield.dev" />
     <meta property="og:type" content="website" />
     <meta name="twitter:card" content="summary" />
     <meta name="twitter:title" content="VoiceField — Voice input for any text field" />
-    <meta name="twitter:description" content="A React hook that turns a phone into a wireless mic for any web form. Open source, self-hostable." />
+    <meta
+      name="twitter:description"
+      content="A React hook that turns a phone into a wireless mic for any web form. Open source, self-hostable."
+    />
     <link rel="canonical" href="https://voicefield.dev" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <style>
@@ -39,22 +48,42 @@
   </head>
   <body>
     <script>
-      (function(){var t=localStorage.getItem("vf-theme");if(t==="dark"||(t!=="light"&&matchMedia("(prefers-color-scheme:dark)").matches))document.documentElement.classList.add("dark")})()
+      ;(function () {
+        var t = localStorage.getItem("vf-theme")
+        if (t === "dark" || (t !== "light" && matchMedia("(prefers-color-scheme:dark)").matches))
+          document.documentElement.classList.add("dark")
+      })()
     </script>
     <div id="root"></div>
     <!-- Static content for non-JS clients (bots, agents, crawlers) — hidden once React mounts -->
     <div id="static-fallback">
       <h1>VoiceField — Voice input for any text field</h1>
-      <p>A drop-in React hook that adds realtime voice input to any textarea, input, or prompt box. Your user's phone becomes the mic.</p>
+      <p>
+        A drop-in React hook that adds realtime voice input to any textarea, input, or prompt box.
+        Your user's phone becomes the mic.
+      </p>
       <p>Install: npm install @voicefield/react @voicefield/server</p>
-      <p>Works out of the box with the browser's Web Speech API — no API key needed. Speech recognition runs on the phone — no audio leaves the device, only text. Three files to integrate: API route, phone page, your component.</p>
+      <p>
+        Works out of the box with the browser's Web Speech API — no API key needed. Speech
+        recognition runs on the phone — no audio leaves the device, only text. Three files to
+        integrate: API route, phone page, your component.
+      </p>
       <h2>Try the demo</h2>
-      <pre>git clone https://github.com/tatargabor/voicefield.git
+      <pre>
+git clone https://github.com/tatargabor/voicefield.git
 cd voicefield && pnpm install && pnpm build
 cd apps/example && pnpm dev
-ngrok http 3000</pre>
-      <p>Source: <a href="https://github.com/tatargabor/voicefield">github.com/tatargabor/voicefield</a></p>
-      <p>Packages: <a href="https://npmjs.com/package/@voicefield/react">@voicefield/react</a> · <a href="https://npmjs.com/package/@voicefield/server">@voicefield/server</a> · <a href="https://npmjs.com/package/@voicefield/core">@voicefield/core</a></p>
+ngrok http 3000</pre
+      >
+      <p>
+        Source:
+        <a href="https://github.com/tatargabor/voicefield">github.com/tatargabor/voicefield</a>
+      </p>
+      <p>
+        Packages: <a href="https://npmjs.com/package/@voicefield/react">@voicefield/react</a> ·
+        <a href="https://npmjs.com/package/@voicefield/server">@voicefield/server</a> ·
+        <a href="https://npmjs.com/package/@voicefield/core">@voicefield/core</a>
+      </p>
     </div>
     <script type="module" src="/src/main.tsx"></script>
   </body>

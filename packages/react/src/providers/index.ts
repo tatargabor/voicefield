@@ -10,7 +10,9 @@ const providers = new Map<string, STTProviderFactory>([
 export function getProvider(name: string): STTProviderFactory {
   const factory = providers.get(name)
   if (!factory) {
-    throw new Error(`Unknown STT provider: "${name}". Available: ${[...providers.keys()].join(", ")}`)
+    throw new Error(
+      `Unknown STT provider: "${name}". Available: ${[...providers.keys()].join(", ")}`,
+    )
   }
   return factory
 }

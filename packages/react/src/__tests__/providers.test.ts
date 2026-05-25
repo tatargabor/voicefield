@@ -43,7 +43,6 @@ describe("createWebSpeechProvider", () => {
       stop: vi.fn(),
       abort: vi.fn(),
     }
-
     ;(globalThis as Record<string, unknown>).webkitSpeechRecognition = function () {
       return mockRecognition
     }

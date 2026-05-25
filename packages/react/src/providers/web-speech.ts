@@ -39,7 +39,9 @@ type SpeechRecognitionConstructor = new () => SpeechRecognitionInstance
 
 function getSpeechRecognition(): SpeechRecognitionConstructor | null {
   const w = globalThis as Record<string, unknown>
-  return (w.SpeechRecognition ?? w.webkitSpeechRecognition ?? null) as SpeechRecognitionConstructor | null
+  return (w.SpeechRecognition ??
+    w.webkitSpeechRecognition ??
+    null) as SpeechRecognitionConstructor | null
 }
 
 export function createWebSpeechProvider(config: STTProviderConfig): STTProviderInstance {

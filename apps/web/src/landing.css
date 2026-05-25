@@ -92,7 +92,9 @@ html.dark {
   letter-spacing: -0.01em;
 }
 
-.nav-logo-icon { color: var(--fg); }
+.nav-logo-icon {
+  color: var(--fg);
+}
 
 .nav-links {
   display: flex;
@@ -107,7 +109,9 @@ html.dark {
   color: var(--muted);
   transition: color 0.15s;
 }
-.nav-links a:hover { color: var(--fg); }
+.nav-links a:hover {
+  color: var(--fg);
+}
 
 .nav-github {
   display: inline-flex;
@@ -118,7 +122,9 @@ html.dark {
   color: var(--fg) !important;
   transition: border-color 0.15s;
 }
-.nav-github:hover { border-color: var(--border-2); }
+.nav-github:hover {
+  border-color: var(--border-2);
+}
 
 .theme-toggle {
   display: inline-flex;
@@ -133,7 +139,9 @@ html.dark {
   cursor: pointer;
   transition: border-color 0.15s;
 }
-.theme-toggle:hover { border-color: var(--border-2); }
+.theme-toggle:hover {
+  border-color: var(--border-2);
+}
 
 /* ── Copy Button ── */
 
@@ -148,7 +156,9 @@ html.dark {
   background: transparent;
   color: var(--muted-2);
   cursor: pointer;
-  transition: color 0.15s, background 0.15s;
+  transition:
+    color 0.15s,
+    background 0.15s;
   flex-shrink: 0;
 }
 .copy-btn:hover {
@@ -245,7 +255,9 @@ html.dark {
   color: var(--accent-fg);
   transition: opacity 0.15s;
 }
-.btn-primary:hover { opacity: 0.85; }
+.btn-primary:hover {
+  opacity: 0.85;
+}
 
 .btn-secondary {
   display: inline-flex;
@@ -258,7 +270,9 @@ html.dark {
   border-radius: var(--radius-xs);
   border: 1px solid var(--border);
   color: var(--fg);
-  transition: background 0.15s, border-color 0.15s;
+  transition:
+    background 0.15s,
+    border-color 0.15s;
 }
 .btn-secondary:hover {
   background: var(--bg-2);
@@ -372,9 +386,15 @@ html.dark {
   height: 10px;
   border-radius: 50%;
 }
-.desktop-bar span:nth-child(1) { background: #ef4444; }
-.desktop-bar span:nth-child(2) { background: #f59e0b; }
-.desktop-bar span:nth-child(3) { background: #22c55e; }
+.desktop-bar span:nth-child(1) {
+  background: #ef4444;
+}
+.desktop-bar span:nth-child(2) {
+  background: #f59e0b;
+}
+.desktop-bar span:nth-child(3) {
+  background: #22c55e;
+}
 
 .desktop-screen {
   position: relative;
@@ -390,17 +410,35 @@ html.dark {
   object-fit: cover;
 }
 
-.flow-img { opacity: 0; }
-.flow-img-1 { animation: cycle3 12s infinite; }
-.flow-img-2 { animation: cycle3 12s 4s infinite; }
-.flow-img-3 { animation: cycle3 12s 8s infinite; }
+.flow-img {
+  opacity: 0;
+}
+.flow-img-1 {
+  animation: cycle3 12s infinite;
+}
+.flow-img-2 {
+  animation: cycle3 12s 4s infinite;
+}
+.flow-img-3 {
+  animation: cycle3 12s 8s infinite;
+}
 
 @keyframes cycle3 {
-  0% { opacity: 0; }
-  5% { opacity: 1; }
-  33.3% { opacity: 1; }
-  38.3% { opacity: 0; }
-  100% { opacity: 0; }
+  0% {
+    opacity: 0;
+  }
+  5% {
+    opacity: 1;
+  }
+  33.3% {
+    opacity: 1;
+  }
+  38.3% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 0;
+  }
 }
 
 .flow-connector {
@@ -413,7 +451,13 @@ html.dark {
 .flow-line {
   width: 48px;
   height: 1px;
-  background: repeating-linear-gradient(90deg, var(--border-2) 0, var(--border-2) 5px, transparent 5px, transparent 9px);
+  background: repeating-linear-gradient(
+    90deg,
+    var(--border-2) 0,
+    var(--border-2) 5px,
+    transparent 5px,
+    transparent 9px
+  );
 }
 
 .flow-badge {
@@ -444,16 +488,35 @@ html.dark {
   opacity: 0.4;
 }
 
-.flow-step-1 { animation: step-hl 12s infinite; }
-.flow-step-2 { animation: step-hl 12s 4s infinite; }
-.flow-step-3 { animation: step-hl 12s 8s infinite; }
+.flow-step-1 {
+  animation: step-hl 12s infinite;
+}
+.flow-step-2 {
+  animation: step-hl 12s 4s infinite;
+}
+.flow-step-3 {
+  animation: step-hl 12s 8s infinite;
+}
 
 @keyframes step-hl {
-  0% { opacity: 0.4; }
-  5% { opacity: 1; color: var(--fg); }
-  33.3% { opacity: 1; color: var(--fg); }
-  38.3% { opacity: 0.4; color: var(--muted); }
-  100% { opacity: 0.4; }
+  0% {
+    opacity: 0.4;
+  }
+  5% {
+    opacity: 1;
+    color: var(--fg);
+  }
+  33.3% {
+    opacity: 1;
+    color: var(--fg);
+  }
+  38.3% {
+    opacity: 0.4;
+    color: var(--muted);
+  }
+  100% {
+    opacity: 0.4;
+  }
 }
 
 /* ── Privacy Callout ── */
@@ -705,7 +768,9 @@ html.dark {
   line-height: 1.6;
 }
 
-.start-upgrade strong { color: var(--fg); }
+.start-upgrade strong {
+  color: var(--fg);
+}
 
 .start-upgrade a {
   color: var(--fg);
@@ -825,7 +890,9 @@ html.dark {
   text-decoration: none;
   font-size: 12px;
 }
-.footer-links a:hover { color: var(--fg); }
+.footer-links a:hover {
+  color: var(--fg);
+}
 
 .footer-copy {
   font-size: 12px;
@@ -835,11 +902,17 @@ html.dark {
 /* ── Responsive ── */
 
 @media (max-width: 768px) {
-  .hero { padding: 60px 0 40px; }
+  .hero {
+    padding: 60px 0 40px;
+  }
 
-  .flow { padding: 60px 0; }
+  .flow {
+    padding: 60px 0;
+  }
 
-  .transform-grid { flex-direction: column; }
+  .transform-grid {
+    flex-direction: column;
+  }
 
   .transform-col:first-child {
     border-radius: var(--radius) var(--radius) 0 0;
@@ -862,19 +935,39 @@ html.dark {
     padding: 24px 16px;
   }
 
-  .phone { width: 132px; height: 264px; }
+  .phone {
+    width: 132px;
+    height: 264px;
+  }
 
-  .flow-connector { flex-direction: row; gap: 10px; }
-  .flow-line { width: 28px; }
+  .flow-connector {
+    flex-direction: row;
+    gap: 10px;
+  }
+  .flow-line {
+    width: 28px;
+  }
 
-  .desktop { width: 100%; }
+  .desktop {
+    width: 100%;
+  }
 
-  .flow-steps { gap: 16px; }
-  .flow-step { font-size: 11px; }
+  .flow-steps {
+    gap: 16px;
+  }
+  .flow-step {
+    font-size: 11px;
+  }
 
-  .start { padding: 60px 0; }
-  .start-step-file { display: none; }
-  .start-step pre { font-size: 11px; }
+  .start {
+    padding: 60px 0;
+  }
+  .start-step-file {
+    display: none;
+  }
+  .start-step pre {
+    font-size: 11px;
+  }
 
   .footer-inner {
     flex-direction: column;
@@ -882,5 +975,7 @@ html.dark {
     text-align: center;
   }
 
-  .nav-links a:not(.nav-github) { display: none; }
+  .nav-links a:not(.nav-github) {
+    display: none;
+  }
 }
