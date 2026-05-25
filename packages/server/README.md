@@ -1,6 +1,6 @@
 # @voicefield/server
 
-Server-side relay handler for Voicefield. Manages sessions, pairing, and transcript relay between the phone and desktop browser via SSE.
+Server-side relay handler for [Voicefield](https://voicefield.dev). Manages sessions, pairing, and transcript relay between the phone and desktop browser via SSE.
 
 ## Install
 

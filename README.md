@@ -1,5 +1,7 @@
 # Voicefield
 
+[voicefield.dev](https://voicefield.dev) · [Documentation](docs/) · [npm](https://www.npmjs.com/org/voicefield)
+
 **Voice-enable any web field.** Turn your phone into a microphone for any web application.
 
 Scan a QR code → speak into your phone → text appears in the web field. Real-time, open source, self-hostable.

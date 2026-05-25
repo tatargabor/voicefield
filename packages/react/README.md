@@ -1,6 +1,6 @@
 # @voicefield/react
 
-React hook and components for adding voice input to any web field. Scan a QR code with your phone, speak, and text appears in your desktop browser.
+React hook and components for adding voice input to any web field. Scan a QR code with your phone, speak, and text appears in your desktop browser. Part of [Voicefield](https://voicefield.dev).
 
 ## Install
 

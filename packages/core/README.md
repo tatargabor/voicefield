@@ -1,6 +1,6 @@
 # @voicefield/core
 
-Shared types and utilities for the Voicefield ecosystem. Zero runtime dependencies.
+Shared types and utilities for the [Voicefield](https://voicefield.dev) ecosystem. Zero runtime dependencies.
 
 ## Install
 
