@@ -1,6 +1,6 @@
 {
   "name": "@voicefield/react",
-  "version": "0.2.6",
+  "version": "0.2.7",
   "description": "React hook and components for Voicefield voice input",
   "keywords": ["react", "voice-input", "speech-to-text", "stt", "hook", "microphone", "qr-code", "web-speech-api", "dictation", "voicefield"],
   "homepage": "https://voicefield.dev",
@@ -31,7 +31,7 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@voicefield/core": "workspace:^0.2.6",
+    "@voicefield/core": "workspace:^0.2.7",
     "qrcode": "^1.5.0"
   },
   "peerDependencies": {
