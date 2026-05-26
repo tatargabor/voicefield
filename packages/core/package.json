@@ -1,6 +1,6 @@
 {
   "name": "@voicefield/core",
-  "version": "0.2.7",
+  "version": "0.2.8",
   "description": "Core types and utilities for Voicefield",
   "keywords": ["voicefield", "voice-input", "speech-to-text", "types"],
   "homepage": "https://voicefield.dev",
