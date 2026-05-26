@@ -48,6 +48,7 @@ export function createWebSpeechProvider(config: STTProviderConfig): STTProviderI
   let recognition: SpeechRecognitionInstance | null = null
   let intentionallyStopped = false
   let lastPartial = ""
+  let lastFinalText = ""
 
   return {
     async start() {
@@ -63,6 +64,7 @@ export function createWebSpeechProvider(config: STTProviderConfig): STTProviderI
 
       intentionallyStopped = false
       lastPartial = ""
+      lastFinalText = ""
       let processedFinalCount = 0
       recognition = new SpeechRecognition()
       recognition.continuous = true
@@ -76,6 +78,7 @@ export function createWebSpeechProvider(config: STTProviderConfig): STTProviderI
           if (result.isFinal) {
             if (i >= processedFinalCount) {
               processedFinalCount = i + 1
+              lastFinalText = transcript
               lastPartial = ""
               config.onFinal(transcript)
             }
@@ -93,10 +96,11 @@ export function createWebSpeechProvider(config: STTProviderConfig): STTProviderI
 
       recognition.onend = () => {
         if (!intentionallyStopped && recognition) {
-          if (lastPartial) {
+          if (lastPartial && lastPartial !== lastFinalText) {
             config.onFinal(lastPartial)
-            lastPartial = ""
+            lastFinalText = lastPartial
           }
+          lastPartial = ""
           processedFinalCount = 0
           try {
             recognition.start()
