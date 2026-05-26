@@ -44,11 +44,37 @@ function getSpeechRecognition(): SpeechRecognitionConstructor | null {
     null) as SpeechRecognitionConstructor | null
 }
 
+const PARTIAL_FLUSH_MS = 2000
+
 export function createWebSpeechProvider(config: STTProviderConfig): STTProviderInstance {
   let recognition: SpeechRecognitionInstance | null = null
   let intentionallyStopped = false
   let lastPartial = ""
   let lastFinalText = ""
+  let partialTimer: ReturnType<typeof setTimeout> | null = null
+  let lastPartialTime = 0
+
+  function flushPartial() {
+    if (lastPartial && lastPartial !== lastFinalText) {
+      config.onFinal(lastPartial)
+      lastFinalText = lastPartial
+      lastPartial = ""
+    }
+  }
+
+  function resetPartialTimer() {
+    if (partialTimer) clearTimeout(partialTimer)
+    partialTimer = setTimeout(() => {
+      flushPartial()
+    }, PARTIAL_FLUSH_MS)
+  }
+
+  function clearPartialTimer() {
+    if (partialTimer) {
+      clearTimeout(partialTimer)
+      partialTimer = null
+    }
+  }
 
   return {
     async start() {
@@ -65,6 +91,7 @@ export function createWebSpeechProvider(config: STTProviderConfig): STTProviderI
       intentionallyStopped = false
       lastPartial = ""
       lastFinalText = ""
+      lastPartialTime = 0
       let processedFinalCount = 0
       recognition = new SpeechRecognition()
       recognition.continuous = true
@@ -78,13 +105,16 @@ export function createWebSpeechProvider(config: STTProviderConfig): STTProviderI
           if (result.isFinal) {
             if (i >= processedFinalCount) {
               processedFinalCount = i + 1
+              clearPartialTimer()
               lastFinalText = transcript
               lastPartial = ""
               config.onFinal(transcript)
             }
           } else {
             lastPartial = transcript
+            lastPartialTime = Date.now()
             config.onPartial(transcript)
+            resetPartialTimer()
           }
         }
       }
@@ -96,11 +126,8 @@ export function createWebSpeechProvider(config: STTProviderConfig): STTProviderI
 
       recognition.onend = () => {
         if (!intentionallyStopped && recognition) {
-          if (lastPartial && lastPartial !== lastFinalText) {
-            config.onFinal(lastPartial)
-            lastFinalText = lastPartial
-          }
-          lastPartial = ""
+          clearPartialTimer()
+          flushPartial()
           processedFinalCount = 0
           try {
             recognition.start()
@@ -117,6 +144,7 @@ export function createWebSpeechProvider(config: STTProviderConfig): STTProviderI
 
     async stop() {
       intentionallyStopped = true
+      clearPartialTimer()
       if (recognition) {
         try {
           recognition.stop()
