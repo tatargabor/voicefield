@@ -1,6 +1,6 @@
 {
   "name": "@voicefield/server",
-  "version": "0.2.8",
+  "version": "0.2.9",
   "description": "Voicefield server-side relay for Next.js",
   "keywords": ["voicefield", "voice-input", "speech-to-text", "nextjs", "sse", "relay", "server"],
   "homepage": "https://voicefield.dev",
@@ -25,7 +25,7 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@voicefield/core": "workspace:^0.2.8"
+    "@voicefield/core": "workspace:^0.2.9"
   },
   "peerDependencies": {
     "next": ">=14.0.0",
