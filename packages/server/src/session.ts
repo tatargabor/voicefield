@@ -33,14 +33,20 @@ const PAIRING_TTL_MS = 5 * 60 * 1000
 const EVENT_BUFFER_MAX_AGE_MS = 60 * 1000
 const CLEANUP_INTERVAL_MS = 60 * 1000
 
-const sessions = new Map<string, Session>()
-const codeIndex = new Map<string, string>()
+const g = globalThis as unknown as {
+  __vf_sessions?: Map<string, Session>
+  __vf_codeIndex?: Map<string, string>
+  __vf_cleanupTimer?: ReturnType<typeof setInterval> | null
+}
+const sessions = (g.__vf_sessions ??= new Map<string, Session>())
+const codeIndex = (g.__vf_codeIndex ??= new Map<string, string>())
 
-let cleanupTimer: ReturnType<typeof setInterval> | null = null
+let cleanupTimer: ReturnType<typeof setInterval> | null = g.__vf_cleanupTimer ?? null
 
 function ensureCleanupRunning() {
   if (cleanupTimer) return
   cleanupTimer = setInterval(cleanupExpired, CLEANUP_INTERVAL_MS)
+  g.__vf_cleanupTimer = cleanupTimer
   if (typeof cleanupTimer === "object" && "unref" in cleanupTimer) {
     cleanupTimer.unref()
   }

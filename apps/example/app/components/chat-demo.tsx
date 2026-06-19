@@ -18,6 +18,7 @@ export function ChatDemo() {
 
   const vf = useVoicefield({
     serverUrl: "/api/voice",
+    phoneUrl: typeof window !== "undefined" ? window.location.origin : "",
     language: "en",
   })
 

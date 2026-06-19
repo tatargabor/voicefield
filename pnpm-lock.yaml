@@ -7,6 +7,10 @@ settings:
 importers:
 
   .:
+    dependencies:
+      '@soniox/client':
+        specifier: ^2.1.0
+        version: 2.1.0
     devDependencies:
       '@eslint/js':
         specifier: ^10.0.1

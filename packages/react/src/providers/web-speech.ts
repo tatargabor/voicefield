@@ -44,36 +44,37 @@ function getSpeechRecognition(): SpeechRecognitionConstructor | null {
     null) as SpeechRecognitionConstructor | null
 }
 
-const PARTIAL_FLUSH_MS = 2000
+const COMMIT_INTERVAL_MS = 1500
 
 export function createWebSpeechProvider(config: STTProviderConfig): STTProviderInstance {
   let recognition: SpeechRecognitionInstance | null = null
-  let intentionallyStopped = false
-  let lastPartial = ""
-  let lastFinalText = ""
-  let partialTimer: ReturnType<typeof setTimeout> | null = null
-  let lastPartialTime = 0
+  let stopped = false
+  let commitTimer: ReturnType<typeof setInterval> | null = null
 
-  function flushPartial() {
-    if (lastPartial && lastPartial !== lastFinalText) {
-      config.onFinal(lastPartial)
-      lastFinalText = lastPartial
-      lastPartial = ""
+  // Delta tracking: we build a full transcript from all results and track
+  // how much of it we've already committed (sent as final).
+  let committedLen = 0
+  let fullText = ""
+
+  function buildFullText(results: SpeechRecognitionResultList): string {
+    let text = ""
+    for (let i = 0; i < results.length; i++) {
+      text += (text ? " " : "") + results[i][0].transcript
     }
+    return text
   }
 
-  function resetPartialTimer() {
-    if (partialTimer) clearTimeout(partialTimer)
-    partialTimer = setTimeout(() => {
-      flushPartial()
-    }, PARTIAL_FLUSH_MS)
+  function commitDelta() {
+    if (fullText.length <= committedLen) return
+    const delta = fullText.slice(committedLen).trim()
+    if (!delta) return
+    config.onFinal(delta)
+    committedLen = fullText.length
   }
 
-  function clearPartialTimer() {
-    if (partialTimer) {
-      clearTimeout(partialTimer)
-      partialTimer = null
-    }
+  function emitPartial() {
+    const partial = fullText.slice(committedLen).trim()
+    if (partial) config.onPartial(partial)
   }
 
   return {
@@ -88,35 +89,18 @@ export function createWebSpeechProvider(config: STTProviderConfig): STTProviderI
         return
       }
 
-      intentionallyStopped = false
-      lastPartial = ""
-      lastFinalText = ""
-      lastPartialTime = 0
-      let processedFinalCount = 0
+      stopped = false
+      committedLen = 0
+      fullText = ""
+
       recognition = new SpeechRecognition()
       recognition.continuous = true
       recognition.interimResults = true
       recognition.lang = Array.isArray(config.language) ? config.language[0] : config.language
 
       recognition.onresult = (event: SpeechRecognitionEvent) => {
-        for (let i = event.resultIndex; i < event.results.length; i++) {
-          const result = event.results[i]
-          const transcript = result[0].transcript
-          if (result.isFinal) {
-            if (i >= processedFinalCount) {
-              processedFinalCount = i + 1
-              clearPartialTimer()
-              lastFinalText = transcript
-              lastPartial = ""
-              config.onFinal(transcript)
-            }
-          } else {
-            lastPartial = transcript
-            lastPartialTime = Date.now()
-            config.onPartial(transcript)
-            resetPartialTimer()
-          }
-        }
+        fullText = buildFullText(event.results)
+        emitPartial()
       }
 
       recognition.onerror = (event: { error: string; message?: string }) => {
@@ -125,15 +109,18 @@ export function createWebSpeechProvider(config: STTProviderConfig): STTProviderI
       }
 
       recognition.onend = () => {
-        if (!intentionallyStopped && recognition) {
-          clearPartialTimer()
-          flushPartial()
-          processedFinalCount = 0
-          try {
-            recognition.start()
-          } catch {}
-        }
+        if (stopped) return
+        commitDelta()
+        committedLen = 0
+        fullText = ""
+        try {
+          recognition!.start()
+        } catch {}
       }
+
+      commitTimer = setInterval(() => {
+        if (!stopped) commitDelta()
+      }, COMMIT_INTERVAL_MS)
 
       try {
         recognition.start()
@@ -143,8 +130,12 @@ export function createWebSpeechProvider(config: STTProviderConfig): STTProviderI
     },
 
     async stop() {
-      intentionallyStopped = true
-      clearPartialTimer()
+      stopped = true
+      if (commitTimer) {
+        clearInterval(commitTimer)
+        commitTimer = null
+      }
+      commitDelta()
       if (recognition) {
         try {
           recognition.stop()

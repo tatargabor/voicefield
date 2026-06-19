@@ -140,7 +140,7 @@ export function useVoicefield(config: VoicefieldConfig): UseVoicefieldReturn {
                 fieldId: string
               }
               if (isFinal) {
-                registryRef.current.finalizePartial(fieldId)
+                registryRef.current.clearPartial(fieldId)
                 registryRef.current.injectText(fieldId, text, true)
               } else {
                 registryRef.current.injectText(fieldId, text, false)

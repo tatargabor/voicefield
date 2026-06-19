@@ -110,7 +110,7 @@ describe("createWebSpeechProvider", () => {
     expect(onPartial).toHaveBeenCalledWith("hello")
   })
 
-  it("calls onFinal for final results", async () => {
+  it("calls onFinal for final results on stop", async () => {
     const onFinal = vi.fn()
     const provider = createWebSpeechProvider({
       sttKey: null,
@@ -128,6 +128,7 @@ describe("createWebSpeechProvider", () => {
         0: { isFinal: true, length: 1, 0: { transcript: "hello world", confidence: 0.95 } },
       },
     })
+    await provider.stop()
     expect(onFinal).toHaveBeenCalledWith("hello world")
   })
 

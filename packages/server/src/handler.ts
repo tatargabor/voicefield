@@ -199,7 +199,7 @@ async function handlePair(
       fields: session.fields,
       language: session.language,
       config: {
-        maxRecordingDuration: 120,
+        maxRecordingDuration: 600,
         idleTimeout: 30,
       },
     },

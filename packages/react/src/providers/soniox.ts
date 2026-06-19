@@ -43,16 +43,35 @@ export function createSonioxProvider(config: STTProviderConfig): STTProviderInst
         signal: abortController.signal,
       })
 
+      // Soniox sends cumulative tokens: each result contains ALL tokens from
+      // session start. We track how much finalized text we already emitted so
+      // we only forward the NEW incremental portion.
+      let emittedFinalText = ""
+
       recording.on("result", (result: { tokens?: Array<{ text: string; is_final?: boolean }> }) => {
         const tokens = result.tokens ?? []
-        const text = tokens.map((t: { text: string }) => t.text).join("")
-        if (!text) return
+        if (!tokens.length) return
 
-        const isFinal = tokens.every((t: { is_final?: boolean }) => t.is_final)
-        if (isFinal) {
-          config.onFinal(text)
-        } else {
-          config.onPartial(text)
+        let finalText = ""
+        let partialText = ""
+        for (const t of tokens) {
+          if (t.is_final) finalText += t.text
+          else partialText += t.text
+        }
+
+        // Detect per-segment reset (tokens don't start with previously seen finals)
+        if (emittedFinalText && finalText && !finalText.startsWith(emittedFinalText)) {
+          emittedFinalText = ""
+        }
+
+        if (finalText.length > emittedFinalText.length) {
+          const newFinal = finalText.slice(emittedFinalText.length).trim()
+          emittedFinalText = finalText
+          if (newFinal) config.onFinal(newFinal)
+        }
+
+        if (partialText.trim()) {
+          config.onPartial(partialText.trim())
         }
       })
 

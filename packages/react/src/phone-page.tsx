@@ -30,6 +30,7 @@ export function Mic() {
   const sttRef = useRef<STTProviderInstance | null>(null)
   const partialTextRef = useRef("")
   const serverUrlRef = useRef<string | null>(null)
+  const transcriptBoxRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search)
@@ -283,6 +284,12 @@ export function Mic() {
     }
   }, [])
 
+  useEffect(() => {
+    if (transcriptBoxRef.current) {
+      transcriptBoxRef.current.scrollTop = transcriptBoxRef.current.scrollHeight
+    }
+  }, [transcript, partialText])
+
   function handleCodeSubmit() {
     const code = normalizePairingCode(codeInput)
     if (!isValidPairingCode(code)) {
@@ -443,22 +450,18 @@ export function Mic() {
           {isRec ? "Tap to stop" : "Tap to speak"}
         </p>
 
-        <div style={s.transcriptBox}>
-          {transcript && <p style={{ fontSize: 15, margin: 0, lineHeight: 1.5 }}>{transcript}</p>}
-          {partialText && (
-            <p
-              style={{
-                fontSize: 15,
-                margin: 0,
-                fontStyle: "italic",
-                color: "#888",
-                lineHeight: 1.5,
-              }}
-            >
-              {partialText}
+        <div ref={transcriptBoxRef} style={s.transcriptBox}>
+          {transcript || partialText ? (
+            <p style={{ fontSize: 15, margin: 0, lineHeight: 1.5 }}>
+              {transcript}
+              {partialText && (
+                <span style={{ color: "#888" }}>
+                  {transcript ? " " : ""}
+                  {partialText}
+                </span>
+              )}
             </p>
-          )}
-          {!transcript && !partialText && (
+          ) : (
             <p style={{ fontSize: 14, color: "#bbb", textAlign: "center", margin: 0 }}>
               {isRec ? "Listening..." : "Transcript appears here"}
             </p>
@@ -628,6 +631,8 @@ const s = {
     marginTop: 20,
     width: "100%",
     minHeight: 80,
+    maxHeight: 200,
+    overflowY: "auto" as const,
     padding: 20,
     border: "1px solid #e5e7eb",
     borderRadius: 16,
